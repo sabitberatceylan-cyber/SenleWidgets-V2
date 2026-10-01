@@ -7,7 +7,12 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <queries>
+        <!-- Samsung One UI 8.5 Uygulamaları -->
         <package android:name="com.samsung.android.calendar" />
+        <package android:name="com.sec.android.app.clockpackage" />
+        <package android:name="com.sec.android.daemonapp" />
+        <package android:name="com.samsung.android.lool" />
+        <package android:name="com.samsung.android.app.notes" />
         <intent>
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="https" />
@@ -42,164 +47,102 @@
             </intent-filter>
         </activity>
 
-        <!-- Saat Widget'ları -->
-        <receiver
-            android:name=".ClockW21"
-            android:exported="true"
-            android:label="Saat 2x1">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/info_clock_21" />
+        <!-- Standart Saat Widget'ları -->
+        <receiver android:name=".ClockW21" android:exported="true" android:label="Saat 2x1">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_clock_21" />
+        </receiver>
+        <receiver android:name=".ClockW22" android:exported="true" android:label="Saat 2x2">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_clock_22" />
+        </receiver>
+        <receiver android:name=".ClockW31" android:exported="true" android:label="Saat 3x1">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_clock_31" />
+        </receiver>
+        <receiver android:name=".ClockW32" android:exported="true" android:label="Saat 3x2">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_clock_32" />
         </receiver>
 
-        <receiver
-            android:name=".ClockW22"
-            android:exported="true"
-            android:label="Saat 2x2">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/info_clock_22" />
+        <!-- Standart Hava Durumu Widget'ları -->
+        <receiver android:name=".WeatherW21" android:exported="true" android:label="Hava Durumu 2x1">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_weather_21" />
+        </receiver>
+        <receiver android:name=".WeatherW22" android:exported="true" android:label="Hava Durumu 2x2">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_weather_22" />
+        </receiver>
+        <receiver android:name=".WeatherW31" android:exported="true" android:label="Hava Durumu 3x1">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_weather_31" />
+        </receiver>
+        <receiver android:name=".WeatherW32" android:exported="true" android:label="Hava Durumu 3x2">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_weather_32" />
         </receiver>
 
-        <receiver
-            android:name=".ClockW31"
-            android:exported="true"
-            android:label="Saat 3x1">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/info_clock_31" />
+        <!-- Standart Web Butonu Widget'ları -->
+        <receiver android:name=".LinkW21" android:exported="true" android:label="Web Butonu 2x1">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_link_21" />
+        </receiver>
+        <receiver android:name=".LinkW22" android:exported="true" android:label="Web Butonu 2x2">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_link_22" />
+        </receiver>
+        <receiver android:name=".LinkW31" android:exported="true" android:label="Web Butonu 3x1">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_link_31" />
+        </receiver>
+        <receiver android:name=".LinkW32" android:exported="true" android:label="Web Butonu 3x2">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_link_32" />
         </receiver>
 
-        <receiver
-            android:name=".ClockW32"
-            android:exported="true"
-            android:label="Saat 3x2">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/info_clock_32" />
+        <!-- Klasik Takvim 2x2 -->
+        <receiver android:name=".DateW22" android:exported="true" android:label="Klasik Takvim 2x2">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_date_22" />
         </receiver>
 
-        <!-- Hava Durumu Widget'ları -->
-        <receiver
-            android:name=".WeatherW21"
-            android:exported="true"
-            android:label="Hava Durumu 2x1">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/info_weather_21" />
+        <!-- 🍎 iOS / Apple Tarzı Widget Paketi (One UI 8.5 Entegre) -->
+        <receiver android:name=".IosCalendarW22" android:exported="true" android:label="🍎 iOS Takvim 2x2">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_ios_calendar_22" />
         </receiver>
 
-        <receiver
-            android:name=".WeatherW22"
-            android:exported="true"
-            android:label="Hava Durumu 2x2">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/info_weather_22" />
+        <receiver android:name=".IosWeatherW22" android:exported="true" android:label="🍎 iOS Hava Durumu 2x2">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_ios_weather_22" />
+        </receiver>
+        <receiver android:name=".IosWeatherW21" android:exported="true" android:label="🍎 iOS Hava Durumu 2x1">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_ios_weather_21" />
         </receiver>
 
-        <receiver
-            android:name=".WeatherW31"
-            android:exported="true"
-            android:label="Hava Durumu 3x1">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/info_weather_31" />
+        <receiver android:name=".IosBatteryW22" android:exported="true" android:label="🍎 iOS Batarya Halka 2x2">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_ios_battery_22" />
+        </receiver>
+        <receiver android:name=".IosBatteryW21" android:exported="true" android:label="🍎 iOS Batarya 2x1">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_ios_battery_21" />
         </receiver>
 
-        <receiver
-            android:name=".WeatherW32"
-            android:exported="true"
-            android:label="Hava Durumu 3x2">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/info_weather_32" />
+        <receiver android:name=".IosClockW22" android:exported="true" android:label="🍎 iOS Minimal Saat 2x2">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_ios_clock_22" />
+        </receiver>
+        <receiver android:name=".IosClockW21" android:exported="true" android:label="🍎 iOS Minimal Saat 2x1">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_ios_clock_21" />
         </receiver>
 
-        <!-- Link / Buton Widget'ları -->
-        <receiver
-            android:name=".LinkW21"
-            android:exported="true"
-            android:label="Web Link 2x1">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/info_link_21" />
-        </receiver>
-
-        <receiver
-            android:name=".LinkW22"
-            android:exported="true"
-            android:label="Web Link 2x2">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/info_link_22" />
-        </receiver>
-
-        <receiver
-            android:name=".LinkW31"
-            android:exported="true"
-            android:label="Web Link 3x1">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/info_link_31" />
-        </receiver>
-
-        <receiver
-            android:name=".LinkW32"
-            android:exported="true"
-            android:label="Web Link 3x2">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/info_link_32" />
-        </receiver>
-
-        <!-- Klasik iPhone Tarzı Takvim Widget'ı (Samsung Takvim açar) -->
-        <receiver
-            android:name=".DateW22"
-            android:exported="true"
-            android:label="Klasik Takvim 2x2">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/info_date_22" />
+        <receiver android:name=".IosNotesW22" android:exported="true" android:label="🍎 iOS Notlar/Hatırlatıcı 2x2">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_ios_notes_22" />
         </receiver>
 
     </application>

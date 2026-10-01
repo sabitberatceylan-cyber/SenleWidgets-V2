@@ -5,10 +5,13 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.*
 import android.net.Uri
+import android.os.BatteryManager
 import android.provider.AlarmClock
 import android.provider.CalendarContract
+import android.provider.Settings
 import android.view.View
 import android.widget.RemoteViews
 import org.json.JSONObject
@@ -37,6 +40,18 @@ object P {
         return prefs.getBoolean("global_${k}", prefs.getBoolean(k, d))
     }
 
+    fun i(c: Context, id: Int, k: String, d: Int): Int {
+        val prefs = sp(c)
+        if (id != 0 && prefs.contains("${id}_$k")) {
+            return try { prefs.getInt("${id}_$k", d) } catch (e: Exception) {
+                prefs.getString("${id}_$k", "$d")?.toIntOrNull() ?: d
+            }
+        }
+        return try { prefs.getInt("global_${k}", prefs.getInt(k, d)) } catch (e: Exception) {
+            prefs.getString("global_${k}", prefs.getString(k, "$d"))?.toIntOrNull() ?: d
+        }
+    }
+
     fun put(c: Context, id: Int, k: String, v: Any) {
         val e = sp(c).edit()
         val prefix = if (id != 0) "${id}_$k" else "global_$k"
@@ -44,6 +59,10 @@ object P {
             is Boolean -> {
                 e.putBoolean(prefix, v)
                 if (id == 0) e.putBoolean(k, v)
+            }
+            is Int -> {
+                e.putInt(prefix, v)
+                if (id == 0) e.putInt(k, v)
             }
             else -> {
                 e.putString(prefix, v.toString())
@@ -66,51 +85,95 @@ fun col(s: String, d: Int): Int = try {
     d
 }
 
+fun applyOpacity(baseColor: Int, opacity: Int): Int {
+    if (opacity <= 0) return Color.TRANSPARENT
+    val alpha = (opacity * 255 / 100).coerceIn(0, 255)
+    return Color.argb(alpha, Color.red(baseColor), Color.green(baseColor), Color.blue(baseColor))
+}
+
 object U {
 
-    fun bg(color: Int, cols: Int, rows: Int, isTransparent: Boolean): Bitmap {
+    // One UI 8.5 Squircle Arka Plan Üreteci
+    fun bg(color: Int, cols: Int, rows: Int, opacity: Int): Bitmap {
         val w = cols * 240
         val h = rows * 240
         val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        if (opacity <= 0) {
+            // Tam %100 transparan - sıfır renk ve sıfır çerçeve
+            return bmp
+        }
+
         val cv = Canvas(bmp)
         val p = Paint(Paint.ANTI_ALIAS_FLAG)
-        val rad = minOf(w, h) * 0.16f
+        val rad = minOf(w, h) * 0.18f // One UI Squircle corner
         val rect = RectF(0f, 0f, w.toFloat(), h.toFloat())
 
-        if (isTransparent) {
-            p.color = Color.parseColor("#15FFFFFF")
-            cv.drawRoundRect(rect, rad, rad, p)
+        val fillColor = applyOpacity(color, opacity)
+        p.color = fillColor
+        p.style = Paint.Style.FILL
+        cv.drawRoundRect(rect, rad, rad, p)
+
+        // Buzlu cam hissi veren hafif çizgi
+        if (opacity in 15..95) {
             p.style = Paint.Style.STROKE
-            p.strokeWidth = 3f
-            p.color = Color.parseColor("#30FFFFFF")
-            cv.drawRoundRect(rect, rad, rad, p)
-        } else {
-            p.color = color
+            p.strokeWidth = 2.5f
+            p.color = Color.argb((opacity * 45 / 100).coerceIn(10, 60), 255, 255, 255)
             cv.drawRoundRect(rect, rad, rad, p)
         }
+
         return bmp
+    }
+
+    // Samsung One UI Paket Açıcı (Yüklü değilse standart Android uygulamasına geçer)
+    fun launchSamsungOrFallback(c: Context, id: Int, samsungPkg: String, fallbackIntent: Intent): PendingIntent {
+        val pm = c.packageManager
+        val intent = pm.getLaunchIntentForPackage(samsungPkg) ?: fallbackIntent
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        return PendingIntent.getActivity(c, id, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
     private fun pi(c: Context, id: Int, i: Intent) =
         PendingIntent.getActivity(c, id, i, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+
+    fun getBatteryInfo(c: Context): Pair<Int, Boolean> {
+        return try {
+            val ifilter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+            val b = c.registerReceiver(null, ifilter)
+            val level = b?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+            val scale = b?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
+            val status = b?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
+            val isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
+            val pct = if (level >= 0 && scale > 0) (level * 100 / scale) else 80
+            Pair(pct, isCharging)
+        } catch (e: Exception) {
+            Pair(80, false)
+        }
+    }
 
     fun update(c: Context, m: AppWidgetManager, id: Int, type: String, cols: Int, rows: Int, cls: Class<*>) {
         val rv = when (type) {
             "clock" -> clock(c, id, cols, rows)
             "weather" -> weather(c, id, cols, rows, cls)
             "link" -> link(c, id, cols, rows)
+            "date" -> date(c, id)
+            "ios_calendar" -> iosCalendar(c, id, cols, rows)
+            "ios_weather" -> iosWeather(c, id, cols, rows, cls)
+            "ios_battery" -> iosBattery(c, id, cols, rows)
+            "ios_clock" -> iosClock(c, id, cols, rows)
+            "ios_notes" -> iosNotes(c, id, cols, rows)
             else -> date(c, id)
         }
         m.updateAppWidget(id, rv)
     }
 
+    // 1. STANDART SAAT
     private fun clock(c: Context, id: Int, cols: Int, rows: Int): RemoteViews {
         val rv = RemoteViews(c.packageName, R.layout.w_clock)
         val tc = col(P.s(c, id, "clock_text", "#FFFFFF"), Color.WHITE)
-        val isTransp = P.b(c, id, "clock_transp", false)
+        val opacity = P.i(c, id, "clock_opacity", 100)
         val bgColor = col(P.s(c, id, "clock_bg", "#1E1E2E"), Color.DKGRAY)
 
-        rv.setImageViewBitmap(R.id.bg, bg(bgColor, cols, rows, isTransp))
+        rv.setImageViewBitmap(R.id.bg, bg(bgColor, cols, rows, opacity))
 
         val tf = if (P.b(c, id, "clock_h24", true)) "HH:mm" else "h:mm"
         rv.setCharSequence(R.id.time, "setFormat24Hour", tf)
@@ -130,10 +193,8 @@ object U {
         rv.setViewVisibility(R.id.dateTop, if (show && pos == "top") View.VISIBLE else View.GONE)
         rv.setViewVisibility(R.id.dateBottom, if (show && pos != "top") View.VISIBLE else View.GONE)
 
-        val clockIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        }
-        rv.setOnClickPendingIntent(R.id.root, pi(c, id, clockIntent))
+        val clockIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK }
+        rv.setOnClickPendingIntent(R.id.root, launchSamsungOrFallback(c, id, "com.sec.android.app.clockpackage", clockIntent))
         return rv
     }
 
@@ -186,6 +247,8 @@ object U {
                             else -> "☀️"
                         }
                         P.put(c, 0, "w_temp", "$icon ${Math.round(t)}°C")
+                        P.put(c, 0, "w_temp_num", "${Math.round(t)}°")
+                        P.put(c, 0, "w_icon", icon)
                         P.put(c, 0, "w_desc", d)
                         P.put(c, 0, "w_city", city.uppercase())
                         return
@@ -193,8 +256,8 @@ object U {
                 }
             }
 
-            // Varsayılan & API anahtarsız Open-Meteo Servisi
-            val u = URL("https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,weather_code&timezone=auto")
+            // Open-Meteo Servisi
+            val u = URL("https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=auto")
             val con = u.openConnection() as HttpURLConnection
             con.connectTimeout = 8000
             con.readTimeout = 8000
@@ -206,24 +269,38 @@ object U {
                 val code = current.getInt("weather_code")
                 val (icon, desc) = mapWeather(code)
 
+                var high = Math.round(temp + 2).toString()
+                var low = Math.round(temp - 4).toString()
+                if (json.has("daily")) {
+                    val daily = json.getJSONObject("daily")
+                    val maxArr = daily.optJSONArray("temperature_2m_max")
+                    val minArr = daily.optJSONArray("temperature_2m_min")
+                    if (maxArr != null && maxArr.length() > 0) high = Math.round(maxArr.getDouble(0)).toString()
+                    if (minArr != null && minArr.length() > 0) low = Math.round(minArr.getDouble(0)).toString()
+                }
+
                 P.put(c, 0, "w_temp", "$icon ${Math.round(temp)}°C")
+                P.put(c, 0, "w_temp_num", "${Math.round(temp)}°")
+                P.put(c, 0, "w_icon", icon)
+                P.put(c, 0, "w_high_low", "Y: $high°  D: $low°")
                 P.put(c, 0, "w_desc", desc)
                 P.put(c, 0, "w_city", city.uppercase())
             } else {
-                P.put(c, 0, "w_desc", "Bağlantı Hatası (${con.responseCode})")
+                P.put(c, 0, "w_desc", "Bağlantı Hatası")
             }
         } catch (e: Exception) {
             P.put(c, 0, "w_desc", "Güncellenemedi")
         }
     }
 
+    // 2. STANDART HAVA DURUMU
     private fun weather(c: Context, id: Int, cols: Int, rows: Int, cls: Class<*>): RemoteViews {
         val rv = RemoteViews(c.packageName, R.layout.w_weather)
         val tc = col(P.s(c, id, "weather_text", "#FFFFFF"), Color.WHITE)
-        val isTransp = P.b(c, id, "weather_transp", false)
+        val opacity = P.i(c, id, "weather_opacity", 100)
         val bgColor = col(P.s(c, id, "weather_bg", "#1565C0"), Color.parseColor("#1565C0"))
 
-        rv.setImageViewBitmap(R.id.bg, bg(bgColor, cols, rows, isTransp))
+        rv.setImageViewBitmap(R.id.bg, bg(bgColor, cols, rows, opacity))
         rv.setTextViewText(R.id.city, P.s(c, 0, "w_city", P.s(c, 0, "city", "İSTANBUL").uppercase()))
         rv.setTextViewText(R.id.temp, P.s(c, 0, "w_temp", "⛅ 21°C"))
         rv.setTextViewText(R.id.desc, P.s(c, 0, "w_desc", "Parçalı Bulutlu"))
@@ -237,13 +314,14 @@ object U {
         return rv
     }
 
+    // 3. STANDART WEB LİNK BUTONU
     private fun link(c: Context, id: Int, cols: Int, rows: Int): RemoteViews {
         val rv = RemoteViews(c.packageName, R.layout.w_link)
         val tc = col(P.s(c, id, "link_text", "#FFFFFF"), Color.WHITE)
-        val isTransp = P.b(c, id, "link_transp", false)
+        val opacity = P.i(c, id, "link_opacity", 100)
         val bgColor = col(P.s(c, id, "link_bg", "#4F46E5"), Color.parseColor("#4F46E5"))
 
-        rv.setImageViewBitmap(R.id.bg, bg(bgColor, cols, rows, isTransp))
+        rv.setImageViewBitmap(R.id.bg, bg(bgColor, cols, rows, opacity))
 
         val topText = P.s(c, id, "link_top", "TIKLA")
         rv.setTextViewText(R.id.top, topText)
@@ -257,20 +335,34 @@ object U {
         if (!url.startsWith("http://") && !url.startsWith("https://")) {
             url = "https://$url"
         }
-        val openIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        }
+        val openIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK }
         rv.setOnClickPendingIntent(R.id.root, pi(c, id, openIntent))
         return rv
     }
 
-    // iPhone Tarzı Klasik Takvim Kartı (2x2 Optimize)
-    fun generateCalendarBitmap(c: Context, id: Int): Bitmap {
-        val size = 520
-        val bmp = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+    // 4. STANDART TAKVİM
+    private fun date(c: Context, id: Int): RemoteViews {
+        val rv = RemoteViews(c.packageName, R.layout.w_date)
+        val bmp = generateIosCalendarBitmap(c, id, 2, 2)
+        rv.setImageViewBitmap(R.id.calendar_img, bmp)
+
+        val fallbackIntent = Intent(Intent.ACTION_VIEW).apply { data = Uri.parse("content://com.android.calendar/time/") }
+        rv.setOnClickPendingIntent(R.id.root, launchSamsungOrFallback(c, id, "com.samsung.android.calendar", fallbackIntent))
+        return rv
+    }
+
+    // ==========================================
+    // 🍎 iOS / APPLE TARZI WIDGET ÇİZİCİLERİ
+    // ==========================================
+
+    // 🍎 1. iOS Klasik Takvim Kartı (2x2)
+    fun generateIosCalendarBitmap(c: Context, id: Int, cols: Int, rows: Int): Bitmap {
+        val w = cols * 260
+        val h = rows * 260
+        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
         val cv = Canvas(bmp)
 
-        val isTransp = P.b(c, id, "cal_transp", false)
+        val opacity = P.i(c, id, "cal_opacity", 100)
         val cardBg = col(P.s(c, id, "cal_bg", "#FFFFFF"), Color.WHITE)
         val headerColor = col(P.s(c, id, "cal_head", "#E53935"), Color.parseColor("#E53935"))
         val todayCircleColor = col(P.s(c, id, "cal_circle", "#E53935"), headerColor)
@@ -278,20 +370,21 @@ object U {
 
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-        // Arka plan kartı
-        val cardRect = RectF(0f, 0f, size.toFloat(), size.toFloat())
-        val rad = 72f
-        if (isTransp) {
-            paint.color = Color.parseColor("#20FFFFFF")
-            cv.drawRoundRect(cardRect, rad, rad, paint)
-            paint.style = Paint.Style.STROKE
-            paint.strokeWidth = 3f
-            paint.color = Color.parseColor("#35FFFFFF")
-            cv.drawRoundRect(cardRect, rad, rad, paint)
+        // Arka plan çizimi (Opacity ve One UI Squircle)
+        val cardRect = RectF(0f, 0f, w.toFloat(), h.toFloat())
+        val rad = minOf(w, h) * 0.18f
+
+        if (opacity > 0) {
+            paint.color = applyOpacity(cardBg, opacity)
             paint.style = Paint.Style.FILL
-        } else {
-            paint.color = cardBg
             cv.drawRoundRect(cardRect, rad, rad, paint)
+            if (opacity in 15..95) {
+                paint.style = Paint.Style.STROKE
+                paint.strokeWidth = 2.5f
+                paint.color = Color.argb((opacity * 40 / 100).coerceIn(10, 60), 255, 255, 255)
+                cv.drawRoundRect(cardRect, rad, rad, paint)
+                paint.style = Paint.Style.FILL
+            }
         }
 
         val cal = Calendar.getInstance()
@@ -302,21 +395,20 @@ object U {
         val monthNames = arrayOf("OCAK", "ŞUBAT", "MART", "NİSAN", "MAYIS", "HAZİRAN", "TEMMUZ", "AĞUSTOS", "EYLÜL", "EKİM", "KASIM", "ARALIK")
         val monthTitle = "${monthNames[month]} $year"
 
-        // Başlık (Ay & Yıl)
+        // Başlık
         paint.color = headerColor
         paint.textSize = 34f
         paint.isFakeBoldText = true
         paint.textAlign = Paint.Align.LEFT
         cv.drawText(monthTitle, 40f, 62f, paint)
 
-        // Hafta günleri başlığı
+        // Hafta günleri
         val weekDays = arrayOf("Pt", "Sa", "Ça", "Pe", "Cu", "Ct", "Pz")
         paint.textSize = 21f
-        paint.isFakeBoldText = true
-        paint.color = if (isTransp) Color.parseColor("#B0FFFFFF") else Color.parseColor("#8E8E93")
+        paint.color = if (opacity < 50) Color.WHITE else Color.parseColor("#8E8E93")
         paint.textAlign = Paint.Align.CENTER
 
-        val colWidth = (size - 70f) / 7f
+        val colWidth = (w - 70f) / 7f
         val startX = 35f + colWidth / 2f
         val weekY = 106f
 
@@ -324,7 +416,7 @@ object U {
             cv.drawText(weekDays[i], startX + i * colWidth, weekY, paint)
         }
 
-        // Gün matrisi hesaplama
+        // Gün matrisi
         val tempCal = Calendar.getInstance().apply {
             set(Calendar.YEAR, year)
             set(Calendar.MONTH, month)
@@ -340,21 +432,18 @@ object U {
         val gridStartY = 162f
 
         paint.textSize = 24f
-        paint.isFakeBoldText = false
 
         for (d in 1..daysInMonth) {
             val cx = startX + currentCol * colWidth
             val cy = gridStartY + currentRow * rowHeight
 
             if (d == today) {
-                // Bugün için daire çiz
                 val circlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                     color = todayCircleColor
                     style = Paint.Style.FILL
                 }
                 cv.drawCircle(cx, cy - 8f, 22f, circlePaint)
 
-                // Beyaz gün sayısı
                 paint.color = Color.WHITE
                 paint.isFakeBoldText = true
                 cv.drawText(d.toString(), cx, cy, paint)
@@ -374,18 +463,381 @@ object U {
         return bmp
     }
 
-    private fun date(c: Context, id: Int): RemoteViews {
-        val rv = RemoteViews(c.packageName, R.layout.w_date)
-        val bmp = generateCalendarBitmap(c, id)
-        rv.setImageViewBitmap(R.id.calendar_img, bmp)
+    // 🍎 2. Apple Hava Durumu Kartı (2x2 veya 2x1)
+    fun generateIosWeatherBitmap(c: Context, id: Int, cols: Int, rows: Int): Bitmap {
+        val w = cols * 260
+        val h = rows * 260
+        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val cv = Canvas(bmp)
 
-        // Samsung Takvim veya sistem takvimi intent'i
-        val launchIntent = c.packageManager.getLaunchIntentForPackage("com.samsung.android.calendar")
-            ?: Intent(Intent.ACTION_VIEW).apply {
-                data = Uri.parse("content://com.android.calendar/time/")
+        val opacity = P.i(c, id, "ios_w_opacity", 100)
+        val cardBg = col(P.s(c, id, "ios_w_bg", "#1E3A8A"), Color.parseColor("#1E3A8A"))
+        val textColor = col(P.s(c, id, "ios_w_text", "#FFFFFF"), Color.WHITE)
+
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        val cardRect = RectF(0f, 0f, w.toFloat(), h.toFloat())
+        val rad = minOf(w, h) * 0.18f
+
+        if (opacity > 0) {
+            paint.color = applyOpacity(cardBg, opacity)
+            paint.style = Paint.Style.FILL
+            cv.drawRoundRect(cardRect, rad, rad, paint)
+            if (opacity in 15..95) {
+                paint.style = Paint.Style.STROKE
+                paint.strokeWidth = 2.5f
+                paint.color = Color.argb((opacity * 40 / 100).coerceIn(10, 60), 255, 255, 255)
+                cv.drawRoundRect(cardRect, rad, rad, paint)
+                paint.style = Paint.Style.FILL
             }
-        launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        rv.setOnClickPendingIntent(R.id.root, pi(c, id, launchIntent))
+        }
+
+        val city = P.s(c, 0, "w_city", P.s(c, 0, "city", "İSTANBUL").uppercase())
+        val temp = P.s(c, 0, "w_temp_num", "22°")
+        val icon = P.s(c, 0, "w_icon", "⛅")
+        val desc = P.s(c, 0, "w_desc", "Parçalı Bulutlu")
+        val highLow = P.s(c, 0, "w_high_low", "Y: 25°  D: 16°")
+
+        paint.color = textColor
+        paint.textAlign = Paint.Align.LEFT
+
+        if (rows == 1) {
+            // 2x1 Yatay Tasarım
+            paint.textSize = 28f
+            paint.isFakeBoldText = true
+            cv.drawText(city, 36f, 62f, paint)
+
+            paint.textSize = 20f
+            paint.isFakeBoldText = false
+            paint.color = Color.argb(200, Color.red(textColor), Color.green(textColor), Color.blue(textColor))
+            cv.drawText(desc, 36f, 102f, paint)
+
+            paint.color = textColor
+            paint.textSize = 64f
+            paint.isFakeBoldText = true
+            paint.textAlign = Paint.Align.RIGHT
+            cv.drawText(temp, w - 100f, 96f, paint)
+
+            paint.textSize = 48f
+            cv.drawText(icon, w - 30f, 96f, paint)
+        } else {
+            // 2x2 Kare Tasarım (Tam Apple Weather Kartı)
+            paint.textSize = 30f
+            paint.isFakeBoldText = true
+            cv.drawText(city, 40f, 66f, paint)
+
+            paint.textSize = 84f
+            paint.isFakeBoldText = true
+            cv.drawText(temp, 40f, 180f, paint)
+
+            // İkon
+            paint.textSize = 80f
+            paint.textAlign = Paint.Align.RIGHT
+            cv.drawText(icon, w - 40f, 170f, paint)
+
+            // Alt durum ve Y: D: bilgisi
+            paint.textAlign = Paint.Align.LEFT
+            paint.textSize = 26f
+            paint.isFakeBoldText = true
+            cv.drawText(desc, 40f, 370f, paint)
+
+            paint.textSize = 22f
+            paint.isFakeBoldText = false
+            paint.color = Color.argb(210, Color.red(textColor), Color.green(textColor), Color.blue(textColor))
+            cv.drawText(highLow, 40f, 415f, paint)
+
+            paint.textSize = 18f
+            cv.drawText("Apple Weather Stili • One UI 8.5", 40f, 465f, paint)
+        }
+
+        return bmp
+    }
+
+    // 🍎 3. Apple Batarya Halka Kartı (2x2 veya 2x1)
+    fun generateIosBatteryBitmap(c: Context, id: Int, cols: Int, rows: Int): Bitmap {
+        val w = cols * 260
+        val h = rows * 260
+        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val cv = Canvas(bmp)
+
+        val opacity = P.i(c, id, "ios_bat_opacity", 100)
+        val cardBg = col(P.s(c, id, "ios_bat_bg", "#1C1C1E"), Color.parseColor("#1C1C1E"))
+        val textColor = col(P.s(c, id, "ios_bat_text", "#FFFFFF"), Color.WHITE)
+        val accentColor = col(P.s(c, id, "ios_bat_accent", "#34C759"), Color.parseColor("#34C759")) // Apple Green
+
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        val cardRect = RectF(0f, 0f, w.toFloat(), h.toFloat())
+        val rad = minOf(w, h) * 0.18f
+
+        if (opacity > 0) {
+            paint.color = applyOpacity(cardBg, opacity)
+            paint.style = Paint.Style.FILL
+            cv.drawRoundRect(cardRect, rad, rad, paint)
+            if (opacity in 15..95) {
+                paint.style = Paint.Style.STROKE
+                paint.strokeWidth = 2.5f
+                paint.color = Color.argb((opacity * 40 / 100).coerceIn(10, 60), 255, 255, 255)
+                cv.drawRoundRect(cardRect, rad, rad, paint)
+                paint.style = Paint.Style.FILL
+            }
+        }
+
+        val (pct, isCharging) = getBatteryInfo(c)
+        val ringColor = if (pct <= 20) Color.parseColor("#FF3B30") else accentColor
+
+        if (rows == 1) {
+            // 2x1 Yatay
+            val cx = 110f; val cy = h / 2f; val ringR = 64f
+            val ringRect = RectF(cx - ringR, cy - ringR, cx + ringR, cy + ringR)
+
+            paint.style = Paint.Style.STROKE
+            paint.strokeWidth = 14f
+            paint.color = Color.parseColor("#33FFFFFF")
+            cv.drawArc(ringRect, 0f, 360f, false, paint)
+
+            paint.color = ringColor
+            val sweep = (pct * 360f / 100f)
+            cv.drawArc(ringRect, -90f, sweep, false, paint)
+
+            paint.style = Paint.Style.FILL
+            paint.textSize = 28f
+            paint.isFakeBoldText = true
+            paint.textAlign = Paint.Align.CENTER
+            paint.color = textColor
+            cv.drawText(if (isCharging) "⚡" else "$pct%", cx, cy + 10f, paint)
+
+            paint.textAlign = Paint.Align.LEFT
+            paint.textSize = 30f
+            paint.isFakeBoldText = true
+            cv.drawText("Samsung Galaxy", 220f, cy - 8f, paint)
+
+            paint.textSize = 22f
+            paint.isFakeBoldText = false
+            paint.color = Color.argb(200, Color.red(textColor), Color.green(textColor), Color.blue(textColor))
+            cv.drawText(if (isCharging) "Şarj Oluyor • %$pct" else "Pil: %$pct", 220f, cy + 30f, paint)
+        } else {
+            // 2x2 Kare
+            val cx = w / 2f; val cy = h / 2f - 30f; val ringR = 120f
+            val ringRect = RectF(cx - ringR, cy - ringR, cx + ringR, cy + ringR)
+
+            // Arka plan halkası
+            paint.style = Paint.Style.STROKE
+            paint.strokeWidth = 24f
+            paint.color = Color.parseColor("#33FFFFFF")
+            cv.drawArc(ringRect, 0f, 360f, false, paint)
+
+            // Doluluk halkası
+            paint.color = ringColor
+            val sweep = (pct * 360f / 100f)
+            cv.drawArc(ringRect, -90f, sweep, false, paint)
+
+            // Halka içi simge ve yüzde
+            paint.style = Paint.Style.FILL
+            paint.textSize = 58f
+            paint.isFakeBoldText = true
+            paint.textAlign = Paint.Align.CENTER
+            paint.color = textColor
+            cv.drawText(if (isCharging) "⚡" else "🔋", cx, cy + 6f, paint)
+
+            paint.textSize = 32f
+            cv.drawText("%$pct", cx, cy + 54f, paint)
+
+            // Alt etiket
+            paint.textSize = 26f
+            paint.color = textColor
+            cv.drawText("One UI 8.5 Batarya", cx, h - 80f, paint)
+
+            paint.textSize = 20f
+            paint.isFakeBoldText = false
+            paint.color = Color.argb(190, Color.red(textColor), Color.green(textColor), Color.blue(textColor))
+            cv.drawText(if (isCharging) "Hızlı Şarj Bağlı" else "Kalan Durum Normal", cx, h - 48f, paint)
+        }
+
+        return bmp
+    }
+
+    // 🍎 4. Apple Minimalist Saat Kartı (2x2 veya 2x1)
+    fun generateIosClockBitmap(c: Context, id: Int, cols: Int, rows: Int): Bitmap {
+        val w = cols * 260
+        val h = rows * 260
+        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val cv = Canvas(bmp)
+
+        val opacity = P.i(c, id, "ios_clk_opacity", 100)
+        val cardBg = col(P.s(c, id, "ios_clk_bg", "#18181B"), Color.parseColor("#18181B"))
+        val textColor = col(P.s(c, id, "ios_clk_text", "#FFFFFF"), Color.WHITE)
+        val accentColor = col(P.s(c, id, "ios_clk_accent", "#FF9500"), Color.parseColor("#FF9500")) // Apple Orange
+
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        val cardRect = RectF(0f, 0f, w.toFloat(), h.toFloat())
+        val rad = minOf(w, h) * 0.18f
+
+        if (opacity > 0) {
+            paint.color = applyOpacity(cardBg, opacity)
+            paint.style = Paint.Style.FILL
+            cv.drawRoundRect(cardRect, rad, rad, paint)
+            if (opacity in 15..95) {
+                paint.style = Paint.Style.STROKE
+                paint.strokeWidth = 2.5f
+                paint.color = Color.argb((opacity * 40 / 100).coerceIn(10, 60), 255, 255, 255)
+                cv.drawRoundRect(cardRect, rad, rad, paint)
+                paint.style = Paint.Style.FILL
+            }
+        }
+
+        val cal = Calendar.getInstance()
+        val hour = cal.get(Calendar.HOUR_OF_DAY)
+        val minute = cal.get(Calendar.MINUTE)
+        val timeStr = String.format("%02d:%02d", hour, minute)
+
+        val dayNames = arrayOf("Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi")
+        val monthNames = arrayOf("Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara")
+        val dayOfWeek = dayNames[cal.get(Calendar.DAY_OF_WEEK) - 1]
+        val dayOfMonth = cal.get(Calendar.DAY_OF_MONTH)
+        val month = monthNames[cal.get(Calendar.MONTH)]
+        val dateStr = "$dayOfWeek, $dayOfMonth $month"
+
+        paint.color = textColor
+        paint.textAlign = Paint.Align.LEFT
+
+        if (rows == 1) {
+            paint.textSize = 24f
+            paint.color = accentColor
+            paint.isFakeBoldText = true
+            cv.drawText("İSTANBUL", 38f, 54f, paint)
+
+            paint.textSize = 58f
+            paint.color = textColor
+            cv.drawText(timeStr, 38f, 114f, paint)
+
+            paint.textAlign = Paint.Align.RIGHT
+            paint.textSize = 22f
+            paint.color = Color.argb(200, Color.red(textColor), Color.green(textColor), Color.blue(textColor))
+            cv.drawText(dateStr, w - 38f, 100f, paint)
+        } else {
+            paint.textSize = 28f
+            paint.color = accentColor
+            paint.isFakeBoldText = true
+            cv.drawText("DÜNYA SAATİ", 40f, 68f, paint)
+
+            paint.textSize = 104f
+            paint.color = textColor
+            paint.isFakeBoldText = true
+            cv.drawText(timeStr, 40f, 210f, paint)
+
+            paint.textSize = 28f
+            paint.isFakeBoldText = false
+            cv.drawText(dateStr, 40f, 310f, paint)
+
+            paint.textSize = 24f
+            paint.color = Color.argb(190, Color.red(textColor), Color.green(textColor), Color.blue(textColor))
+            cv.drawText("İSTANBUL  +0 SAAT", 40f, 390f, paint)
+            cv.drawText("⏰ Alarm: Açık • One UI 8.5", 40f, 440f, paint)
+        }
+
+        return bmp
+    }
+
+    // 🍎 5. Apple Notlar / Hatırlatıcı Kartı (2x2)
+    fun generateIosNotesBitmap(c: Context, id: Int, cols: Int, rows: Int): Bitmap {
+        val w = cols * 260
+        val h = rows * 260
+        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val cv = Canvas(bmp)
+
+        val opacity = P.i(c, id, "ios_notes_opacity", 100)
+        val cardBg = col(P.s(c, id, "ios_notes_bg", "#1C1C1E"), Color.parseColor("#1C1C1E"))
+        val textColor = col(P.s(c, id, "ios_notes_text", "#FFFFFF"), Color.WHITE)
+        val accentColor = col(P.s(c, id, "ios_notes_accent", "#0A84FF"), Color.parseColor("#0A84FF")) // Apple Blue
+
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        val cardRect = RectF(0f, 0f, w.toFloat(), h.toFloat())
+        val rad = minOf(w, h) * 0.18f
+
+        if (opacity > 0) {
+            paint.color = applyOpacity(cardBg, opacity)
+            paint.style = Paint.Style.FILL
+            cv.drawRoundRect(cardRect, rad, rad, paint)
+            if (opacity in 15..95) {
+                paint.style = Paint.Style.STROKE
+                paint.strokeWidth = 2.5f
+                paint.color = Color.argb((opacity * 40 / 100).coerceIn(10, 60), 255, 255, 255)
+                cv.drawRoundRect(cardRect, rad, rad, paint)
+                paint.style = Paint.Style.FILL
+            }
+        }
+
+        paint.textAlign = Paint.Align.LEFT
+        paint.color = accentColor
+        paint.textSize = 34f
+        paint.isFakeBoldText = true
+        cv.drawText("📋 Hatırlatıcılar", 40f, 68f, paint)
+
+        val note1 = P.s(c, id, "ios_note_1", "✓ Günlük Görevleri Tamamla")
+        val note2 = P.s(c, id, "ios_note_2", "✓ Toplantı ve Planlar")
+        val note3 = P.s(c, id, "ios_note_3", "✓ Samsung Notlara Git")
+
+        paint.color = textColor
+        paint.textSize = 26f
+        paint.isFakeBoldText = false
+        cv.drawText(note1, 40f, 170f, paint)
+        cv.drawText(note2, 40f, 250f, paint)
+        cv.drawText(note3, 40f, 330f, paint)
+
+        paint.textSize = 20f
+        paint.color = Color.argb(170, Color.red(textColor), Color.green(textColor), Color.blue(textColor))
+        cv.drawText("Dokununca Samsung Notlar açılır", 40f, 440f, paint)
+
+        return bmp
+    }
+
+    private fun iosCalendar(c: Context, id: Int, cols: Int, rows: Int): RemoteViews {
+        val rv = RemoteViews(c.packageName, R.layout.w_ios_card)
+        val bmp = generateIosCalendarBitmap(c, id, cols, rows)
+        rv.setImageViewBitmap(R.id.card_img, bmp)
+
+        val fallbackIntent = Intent(Intent.ACTION_VIEW).apply { data = Uri.parse("content://com.android.calendar/time/") }
+        rv.setOnClickPendingIntent(R.id.root, launchSamsungOrFallback(c, id, "com.samsung.android.calendar", fallbackIntent))
+        return rv
+    }
+
+    private fun iosWeather(c: Context, id: Int, cols: Int, rows: Int, cls: Class<*>): RemoteViews {
+        val rv = RemoteViews(c.packageName, R.layout.w_ios_card)
+        val bmp = generateIosWeatherBitmap(c, id, cols, rows)
+        rv.setImageViewBitmap(R.id.card_img, bmp)
+
+        val fallbackIntent = Intent(c, cls).setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE)
+            .putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, intArrayOf(id))
+        rv.setOnClickPendingIntent(R.id.root, launchSamsungOrFallback(c, id, "com.sec.android.daemonapp", fallbackIntent))
+        return rv
+    }
+
+    private fun iosBattery(c: Context, id: Int, cols: Int, rows: Int): RemoteViews {
+        val rv = RemoteViews(c.packageName, R.layout.w_ios_card)
+        val bmp = generateIosBatteryBitmap(c, id, cols, rows)
+        rv.setImageViewBitmap(R.id.card_img, bmp)
+
+        val fallbackIntent = Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS)
+        rv.setOnClickPendingIntent(R.id.root, launchSamsungOrFallback(c, id, "com.samsung.android.lool", fallbackIntent))
+        return rv
+    }
+
+    private fun iosClock(c: Context, id: Int, cols: Int, rows: Int): RemoteViews {
+        val rv = RemoteViews(c.packageName, R.layout.w_ios_card)
+        val bmp = generateIosClockBitmap(c, id, cols, rows)
+        rv.setImageViewBitmap(R.id.card_img, bmp)
+
+        val fallbackIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
+        rv.setOnClickPendingIntent(R.id.root, launchSamsungOrFallback(c, id, "com.sec.android.app.clockpackage", fallbackIntent))
+        return rv
+    }
+
+    private fun iosNotes(c: Context, id: Int, cols: Int, rows: Int): RemoteViews {
+        val rv = RemoteViews(c.packageName, R.layout.w_ios_card)
+        val bmp = generateIosNotesBitmap(c, id, cols, rows)
+        rv.setImageViewBitmap(R.id.card_img, bmp)
+
+        val fallbackIntent = Intent(Intent.ACTION_MAIN)
+        rv.setOnClickPendingIntent(R.id.root, launchSamsungOrFallback(c, id, "com.samsung.android.app.notes", fallbackIntent))
         return rv
     }
 
@@ -404,8 +856,19 @@ object U {
             LinkW22::class.java to ("link" to (2 to 2)),
             LinkW31::class.java to ("link" to (3 to 1)),
             LinkW32::class.java to ("link" to (3 to 2)),
-            DateW22::class.java to ("date" to (2 to 2))
+            DateW22::class.java to ("date" to (2 to 2)),
+
+            // iOS Widgets
+            IosCalendarW22::class.java to ("ios_calendar" to (2 to 2)),
+            IosWeatherW22::class.java to ("ios_weather" to (2 to 2)),
+            IosWeatherW21::class.java to ("ios_weather" to (2 to 1)),
+            IosBatteryW22::class.java to ("ios_battery" to (2 to 2)),
+            IosBatteryW21::class.java to ("ios_battery" to (2 to 1)),
+            IosClockW22::class.java to ("ios_clock" to (2 to 2)),
+            IosClockW21::class.java to ("ios_clock" to (2 to 1)),
+            IosNotesW22::class.java to ("ios_notes" to (2 to 2))
         )
+
         for ((cls, info) in providers) {
             val (type, size) = info
             val (cols, rows) = size

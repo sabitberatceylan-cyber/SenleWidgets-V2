@@ -1,53 +1,48 @@
-# Senle Widgets Studio (Android)
+# Senle Widgets Studio (Android & Samsung One UI 8.5)
 
-Android için modern, şık, son derece esnek ve anında özelleştirilebilir widget paketi!
+Samsung One UI 8.5 ve tüm modern Android sürümleri için özel olarak tasarlanmış, **Apple / iOS Stüdyosu** içeren, tam şeffaflık ve gelişmiş renk seçici özellikli widget paketi!
 
-## 🌟 Özellikler
+## 🌟 Yeni Eklenen Özellikler
 
-1. **Çoklu Boyut Desteği & Serbest Yeniden Boyutlandırma:**
-   - **2x1 (Yatay)**
-   - **2x2 (Kare)**
-   - **3x1 (Geniş Yatay)**
-   - **3x2 (Büyük Yatay)**
-   - Ana ekrana eklendikten sonra serbestçe büyütüp küçültebilme (`resizeMode="horizontal|vertical"`).
-
-2. **🕒 Saat Widget'ı:**
-   - 24 saat / 12 saat format desteği (`14:30` veya `2:30 PM`).
-   - Tarih açma / kapama seçeneği.
-   - Tarih konumu: Saatin üstünde veya saatin altında ayarlanabilir.
-   - Şeffaf arka plan veya özel HEX renk seçimi (`#1E1E2E`, vb.).
-   - Tıklayınca alarm / saat uygulamasını açar.
-
-3. **⛅ Hava Durumu Widget'ı:**
-   - **Otomatik & Ücretsiz (Open-Meteo):** Hiçbir API anahtarı veya kayıt gerekmeden anında çalışır!
-   - Google Weather API desteği opsiyonel olarak mevcuttur.
-   - Şehir hızlı seçimleri (İstanbul, Ankara, İzmir, Bursa, Antalya) veya GPS konumu.
-   - Anlık sıcaklık (°C), hava durumu emojisi (☀️, ⛅, 🌧️, ❄️, ⛈️) ve Türkçe durum açıklaması.
-   - Tıklayınca hava durumunu anında günceller.
-
-4. **🔗 Web Butonu / Kısayol Widget'ı:**
-   - Tıklayınca dilediğiniz web sitesini (`https://...`) doğrudan tarayıcıda açar.
-   - Üzerinde tıklama yazısı ("TIKLA" veya dilediğiniz metin).
-   - Alt başlık ve açıklama desteği.
-   - Renk ve şeffaflık ayarları.
-
-5. **📅 Klasik iPhone Tarzı Takvim Widget'ı (2x2 Optimize):**
-   - iPhone klasik takvim kartı tasarımında ayın tüm günlerini (1-31) gösteren net tablo matrisi.
-   - Bugünün tarihi özel renkli yuvarlak rozetle belirginleştirilir.
-   - Ay adı (örn: `EKİM 2026`) ve hafta günleri (`Pt Sa Ça Pe Cu Ct Pz`).
-   - Tıklayınca Samsung Takvim (`com.samsung.android.calendar`) veya sistem varsayılan takvim uygulamasını açar.
-   - Üst başlık şeridi, bugün halkası, yazı ve arka plan renkleri tamamen özelleştirilebilir.
-
-6. **🎨 Uygulama İçi Canlı Stüdyo & Düzenleyici:**
-   - Canlı Önizleme (Live Preview): Yapılan her renk, metin veya boyut değişikliği anında ekranda canlanır.
-   - Hızlı Renk Temaları: iOS Kırmızı, Gece Mavisi, Zümrüt Yeşili, Pastel Mor, Amber Sarısı, AMOLED Siyah, Transparan Cam.
-   - "Tüm Widget'ları Güncelle" butonu ile tek tıkla ana ekrandaki tüm aktif widget'ları günceller.
-   - "Ana Ekrana Ekle" özelliği ile doğrudan uygulama içinden ana ekrana iğneleme.
+### 🍎 1. Apple / iOS Widget Stüdyosu
+* 📅 **iOS Klasik Takvim (2x2):**
+  - Ayın tüm günlerini (1-31) gösteren 7 sütunluk klasik iOS takvim kartı.
+  - Bugünün tarihi özel vurgulu daire rozetle belirginleşir.
+  - Tıklayınca doğrudan **Samsung Takvim** (`com.samsung.android.calendar`) açılır.
+* ⛅ **Apple Hava Durumu Kartı (2x2 ve 2x1):**
+  - Orijinal Apple Weather stili dev sıcaklık (`22°`), şehir ve Türkçe durum açıklaması.
+  - En yüksek ve en düşük gün dereceleri (`Y: 24°  D: 15°`).
+  - Tıklayınca **Samsung Hava Durumu** (`com.sec.android.daemonapp`) açılır.
+* 🔋 **Apple Batarya / Pil Halka Kartı (2x2 ve 2x1):**
+  - Cihazın gerçek şarj seviyesini (`%85`) gösteren dinamik dairesel halka göstergesi.
+  - Şarj durumuna göre renk değişimi ve şarj animasyonu hissi.
+  - Tıklayınca **Samsung Cihaz Bakımı & Pil** (`com.samsung.android.lool`) açılır.
+* 🕒 **Apple Minimalist Dijital Saat (2x2 ve 2x1):**
+  - iOS tipografisiyle şık saat, gün/tarih etiketi ve dünya şehri.
+  - Tıklayınca **Samsung Saat/Alarm** (`com.sec.android.app.clockpackage`) açılır.
+* 📋 **Apple Notlar / Hatırlatıcı Kartı (2x2):**
+  - Şık görev listesi ve hatırlatıcı kartı.
+  - Tıklayınca **Samsung Notlar** (`com.samsung.android.app.notes`) açılır.
 
 ---
 
-## 🚀 Kurulum (APK)
+### 💎 2. Gerçek Şeffaflık & Opaklık Oranı Kaydırıcısı (%0 - %100)
+* **%0 Tamamen Şeffaf:** Arka plan pikselleri sıfır renk ile işlenir, duvar kağıdınız cam gibi 100% görünür.
+* **%1 - %99 Buzlu Cam / Yarı Şeffaf:** Samsung One UI 8.5 squircle köşe ve zarif cam kenarlık efekti.
+* **%100 Tam Opak:** Canlı ve dolgun renkli modern kart.
+* Hızlı butonlar: `%0 Şeffaf`, `%30 Buzlu Cam`, `%70 Yarı Opak`, `%100 Tam Opak`.
 
-1. [Releases](../../releases) sekmesinden en son `SenleWidgets-v2.0.apk` dosyasını indirin.
-2. Telefonunuzda APK dosyasını açıp yükleyin.
-3. Uygulamayı açarak renkleri ve tercihlerinizi ayarlayın veya ana ekranda boş bir yere basılı tutarak **Senle Widgets**'ı seçin.
+---
+
+### 🎨 3. İnteraktif Gelişmiş Renk Seçici Diyaloğu
+* Arka Plan, Yazı ve Vurgu renkleri için açılan renk seçici penceresi.
+* 24 canlı hazır renk çipi (Apple Red, One UI Blue, Coral, Emerald, AMOLED Black vb.).
+* RGB Kırmızı, Yeşil, Mavi hassas kaydırıcıları.
+* Doğrudan HEX (`#RRGGBB`) kodu girişi ve anlık canlı renk önizlemesi.
+
+---
+
+### 📐 4. Boyutlandırma ve One UI 8.5 Uyumu
+* **2x1, 2x2, 3x1, 3x2** boyutları ve eklendikten sonra serbestçe büyütüp küçültebilme (`resizeMode="horizontal|vertical"`).
+* One UI 8.5 akıllı widget desteği ve pürüzsüz squircle köşe yarıçapı.
+* Uygulama içinden tek tıkla **"📌 Bu Widget'ı Ana Ekrana Ekle"** özelliği.

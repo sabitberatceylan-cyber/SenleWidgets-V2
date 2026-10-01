@@ -9,7 +9,7 @@ abstract class BaseP(val type: String, val cols: Int, val rows: Int) : AppWidget
         for (id in ids) {
             U.update(c, m, id, type, cols, rows, this.javaClass)
         }
-        if (type == "weather") {
+        if (type == "weather" || type == "ios_weather") {
             val pr = goAsync()
             Thread {
                 try {
@@ -31,6 +31,7 @@ abstract class BaseP(val type: String, val cols: Int, val rows: Int) : AppWidget
     }
 }
 
+// Standart Widget'lar
 class ClockW21 : BaseP("clock", 2, 1)
 class ClockW22 : BaseP("clock", 2, 2)
 class ClockW31 : BaseP("clock", 3, 1)
@@ -47,3 +48,13 @@ class LinkW31 : BaseP("link", 3, 1)
 class LinkW32 : BaseP("link", 3, 2)
 
 class DateW22 : BaseP("date", 2, 2)
+
+// Apple / iOS Tarzı Widget'lar (Samsung One UI 8.5 Entegre)
+class IosCalendarW22 : BaseP("ios_calendar", 2, 2)
+class IosWeatherW22 : BaseP("ios_weather", 2, 2)
+class IosWeatherW21 : BaseP("ios_weather", 2, 1)
+class IosBatteryW22 : BaseP("ios_battery", 2, 2)
+class IosBatteryW21 : BaseP("ios_battery", 2, 1)
+class IosClockW22 : BaseP("ios_clock", 2, 2)
+class IosClockW21 : BaseP("ios_clock", 2, 1)
+class IosNotesW22 : BaseP("ios_notes", 2, 2)

@@ -16,12 +16,12 @@
             android:orientation="vertical"
             android:padding="20dp">
 
-            <!-- Başlık Kartı -->
+            <!-- Başlık -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingBottom="16dp">
+                android:paddingBottom="14dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -35,36 +35,71 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Şık, dinamik ve esnek Android widget stüdyosu"
-                    android:textColor="#94A3B8"
-                    android:textSize="14sp" />
+                    android:text="Samsung One UI 8.5 &amp; Apple iOS Widget Koleksiyonu"
+                    android:textColor="#38BDF8"
+                    android:textSize="13sp" />
             </LinearLayout>
 
-            <!-- Widget Türü Seçici Sekmeler -->
+            <!-- Ana Kategori Seçimi (iOS Stüdyosu vs Standart Stüdyo) -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="16dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCatIos"
+                    style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="6dp"
+                    android:text="🍎 iOS Stüdyosu"
+                    android:textAllCaps="false"
+                    android:textStyle="bold"
+                    android:textSize="14sp"
+                    app:cornerRadius="16dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnCatStandard"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="52dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:text="⚙️ Standart Stüdyo"
+                    android:textAllCaps="false"
+                    android:textColor="#F8FAFC"
+                    android:textSize="14sp"
+                    app:cornerRadius="16dp"
+                    app:strokeColor="#334155" />
+            </LinearLayout>
+
+            <!-- iOS Widget Seçici Sekmeleri -->
             <HorizontalScrollView
+                android:id="@+id/scrollIosTabs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:scrollbars="none"
-                android:layout_marginBottom="16dp">
+                android:layout_marginBottom="14dp">
 
                 <LinearLayout
-                    android:id="@+id/tabContainer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnTabClock"
+                        android:id="@+id/btnIosTabCal"
                         style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="8dp"
-                        android:text="🕒 Saat"
+                        android:text="📅 Takvim"
                         android:textAllCaps="false"
                         app:cornerRadius="20dp" />
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnTabWeather"
+                        android:id="@+id/btnIosTabWeather"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -76,7 +111,80 @@
                         app:strokeColor="#334155" />
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnTabLink"
+                        android:id="@+id/btnIosTabBattery"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="🔋 Batarya"
+                        android:textAllCaps="false"
+                        android:textColor="#F8FAFC"
+                        app:cornerRadius="20dp"
+                        app:strokeColor="#334155" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnIosTabClock"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="🕒 Minimal Saat"
+                        android:textAllCaps="false"
+                        android:textColor="#F8FAFC"
+                        app:cornerRadius="20dp"
+                        app:strokeColor="#334155" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnIosTabNotes"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📋 Notlar"
+                        android:textAllCaps="false"
+                        android:textColor="#F8FAFC"
+                        app:cornerRadius="20dp"
+                        app:strokeColor="#334155" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- Standart Widget Seçici Sekmeleri -->
+            <HorizontalScrollView
+                android:id="@+id/scrollStdTabs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:layout_marginBottom="14dp"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnStdTabClock"
+                        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="🕒 Saat"
+                        android:textAllCaps="false"
+                        app:cornerRadius="20dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnStdTabWeather"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="⛅ Hava Durumu"
+                        android:textAllCaps="false"
+                        android:textColor="#F8FAFC"
+                        app:cornerRadius="20dp"
+                        app:strokeColor="#334155" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnStdTabLink"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -88,16 +196,15 @@
                         app:strokeColor="#334155" />
 
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnTabCalendar"
+                        android:id="@+id/btnStdTabCal"
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="📅 Klasik Takvim"
+                        android:text="📅 Takvim"
                         android:textAllCaps="false"
                         android:textColor="#F8FAFC"
                         app:cornerRadius="20dp"
                         app:strokeColor="#334155" />
-
                 </LinearLayout>
             </HorizontalScrollView>
 
@@ -105,143 +212,31 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="CANLI ÖNİZLEME"
+                android:text="CANLI ÖNİZLEME (ONE UI 8.5 SQUIRCLE)"
                 android:textColor="#38BDF8"
                 android:textSize="12sp"
                 android:textStyle="bold"
                 android:letterSpacing="0.1"
                 android:layout_marginBottom="8dp" />
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/previewContainerCard"
+            <!-- Önizleme Arka Plan Çerçevesi (Şeffaf modda telefon duvar kağıdı hissi verir) -->
+            <FrameLayout
+                android:id="@+id/previewOuterContainer"
                 android:layout_width="match_parent"
-                android:layout_height="220dp"
-                app:cardCornerRadius="24dp"
-                app:cardBackgroundColor="#1E293B"
-                app:strokeColor="#334155"
-                app:strokeWidth="1dp"
-                android:layout_marginBottom="20dp">
+                android:layout_height="240dp"
+                android:background="#0A0F1D"
+                android:padding="8dp"
+                android:layout_marginBottom="16dp">
 
-                <FrameLayout
-                    android:id="@+id/previewContainer"
+                <ImageView
+                    android:id="@+id/ivLivePreview"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:padding="16dp">
+                    android:scaleType="fitCenter"
+                    android:contentDescription="Canlı Önizleme" />
+            </FrameLayout>
 
-                    <!-- Saat Önizlemesi -->
-                    <LinearLayout
-                        android:id="@+id/previewClock"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:padding="16dp">
-
-                        <TextView
-                            android:id="@+id/previewClockDateTop"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="1 Ekim 2026 Perşembe"
-                            android:textColor="#FFFFFF"
-                            android:textSize="14sp" />
-
-                        <TextView
-                            android:id="@+id/previewClockTime"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="21:45"
-                            android:textColor="#FFFFFF"
-                            android:textSize="48sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/previewClockDateBottom"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="1 Ekim 2026 Perşembe"
-                            android:textColor="#FFFFFF"
-                            android:textSize="14sp" />
-                    </LinearLayout>
-
-                    <!-- Hava Durumu Önizlemesi -->
-                    <LinearLayout
-                        android:id="@+id/previewWeather"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:padding="16dp"
-                        android:visibility="gone">
-
-                        <TextView
-                            android:id="@+id/previewWeatherCity"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="İSTANBUL"
-                            android:textColor="#FFFFFF"
-                            android:textSize="14sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/previewWeatherTemp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="⛅ 21°C"
-                            android:textColor="#FFFFFF"
-                            android:textSize="42sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/previewWeatherDesc"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Parçalı Bulutlu"
-                            android:textColor="#FFFFFF"
-                            android:textSize="14sp" />
-                    </LinearLayout>
-
-                    <!-- Web Butonu Önizlemesi -->
-                    <LinearLayout
-                        android:id="@+id/previewLink"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:orientation="vertical"
-                        android:padding="16dp"
-                        android:visibility="gone">
-
-                        <TextView
-                            android:id="@+id/previewLinkTop"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="TIKLA"
-                            android:textColor="#FFFFFF"
-                            android:textSize="36sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/previewLinkLabel"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="4dp"
-                            android:text="Google • Web'i Aç"
-                            android:textColor="#FFFFFF"
-                            android:textSize="14sp" />
-                    </LinearLayout>
-
-                    <!-- Klasik Takvim Önizlemesi -->
-                    <ImageView
-                        android:id="@+id/previewCalendar"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scaleType="fitCenter"
-                        android:visibility="gone" />
-
-                </FrameLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- RENK VE ŞEFFAFLIK AYARLARI KARTI -->
+            <!-- GELİŞMİŞ RENK SEÇİCİ BÖLÜMÜ -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -260,13 +255,57 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="🎨 Renk &amp; Görünüm"
+                        android:text="🎨 Gelişmiş Renk Seçici"
                         android:textColor="#F8FAFC"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="12dp" />
 
-                    <!-- Hızlı Renk Paleti -->
+                    <!-- Renk Seçici Butonları -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="10dp">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnPickBgColor"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="4dp"
+                            android:text="Arka Plan"
+                            android:textColor="#F8FAFC"
+                            app:cornerRadius="14dp"
+                            app:strokeColor="#6366F1" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnPickTextColor"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginHorizontal="4dp"
+                            android:text="Yazı Rengi"
+                            android:textColor="#F8FAFC"
+                            app:cornerRadius="14dp"
+                            app:strokeColor="#6366F1" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnPickAccentColor"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="4dp"
+                            android:text="Vurgu Rengi"
+                            android:textColor="#F8FAFC"
+                            app:cornerRadius="14dp"
+                            app:strokeColor="#6366F1" />
+                    </LinearLayout>
+
+                    <!-- Hızlı Tema Paletleri -->
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -279,7 +318,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:scrollbars="none"
-                        android:layout_marginBottom="12dp">
+                        android:layout_marginBottom="16dp">
 
                         <LinearLayout
                             android:layout_width="wrap_content"
@@ -287,113 +326,162 @@
                             android:orientation="horizontal">
 
                             <com.google.android.material.button.MaterialButton
-                                android:id="@+id/colorRed"
-                                android:layout_width="44dp"
-                                android:layout_height="44dp"
+                                android:id="@+id/quickRed"
+                                android:layout_width="42dp"
+                                android:layout_height="42dp"
                                 android:layout_marginEnd="8dp"
-                                app:cornerRadius="22dp"
-                                app:backgroundTint="#EF4444" />
+                                app:cornerRadius="21dp"
+                                app:backgroundTint="#FF3B30" />
 
                             <com.google.android.material.button.MaterialButton
-                                android:id="@+id/colorBlue"
-                                android:layout_width="44dp"
-                                android:layout_height="44dp"
+                                android:id="@+id/quickBlue"
+                                android:layout_width="42dp"
+                                android:layout_height="42dp"
                                 android:layout_marginEnd="8dp"
-                                app:cornerRadius="22dp"
-                                app:backgroundTint="#1565C0" />
+                                app:cornerRadius="21dp"
+                                app:backgroundTint="#007AFF" />
 
                             <com.google.android.material.button.MaterialButton
-                                android:id="@+id/colorGreen"
-                                android:layout_width="44dp"
-                                android:layout_height="44dp"
+                                android:id="@+id/quickGreen"
+                                android:layout_width="42dp"
+                                android:layout_height="42dp"
                                 android:layout_marginEnd="8dp"
-                                app:cornerRadius="22dp"
-                                app:backgroundTint="#10B981" />
+                                app:cornerRadius="21dp"
+                                app:backgroundTint="#34C759" />
 
                             <com.google.android.material.button.MaterialButton
-                                android:id="@+id/colorPurple"
-                                android:layout_width="44dp"
-                                android:layout_height="44dp"
+                                android:id="@+id/quickPurple"
+                                android:layout_width="42dp"
+                                android:layout_height="42dp"
                                 android:layout_marginEnd="8dp"
-                                app:cornerRadius="22dp"
-                                app:backgroundTint="#7C3AED" />
+                                app:cornerRadius="21dp"
+                                app:backgroundTint="#AF52DE" />
 
                             <com.google.android.material.button.MaterialButton
-                                android:id="@+id/colorAmber"
-                                android:layout_width="44dp"
-                                android:layout_height="44dp"
+                                android:id="@+id/quickAmber"
+                                android:layout_width="42dp"
+                                android:layout_height="42dp"
                                 android:layout_marginEnd="8dp"
-                                app:cornerRadius="22dp"
-                                app:backgroundTint="#F59E0B" />
+                                app:cornerRadius="21dp"
+                                app:backgroundTint="#FF9500" />
 
                             <com.google.android.material.button.MaterialButton
-                                android:id="@+id/colorDark"
-                                android:layout_width="44dp"
-                                android:layout_height="44dp"
+                                android:id="@+id/quickDark"
+                                android:layout_width="42dp"
+                                android:layout_height="42dp"
                                 android:layout_marginEnd="8dp"
-                                app:cornerRadius="22dp"
-                                app:backgroundTint="#1E1E2E" />
+                                app:cornerRadius="21dp"
+                                app:backgroundTint="#1C1C1E" />
 
                             <com.google.android.material.button.MaterialButton
-                                android:id="@+id/colorWhite"
-                                android:layout_width="44dp"
-                                android:layout_height="44dp"
-                                app:cornerRadius="22dp"
+                                android:id="@+id/quickWhite"
+                                android:layout_width="42dp"
+                                android:layout_height="42dp"
+                                app:cornerRadius="21dp"
                                 app:backgroundTint="#FFFFFF" />
-
                         </LinearLayout>
                     </HorizontalScrollView>
 
-                    <!-- Şeffaf Arka Plan Switch -->
-                    <com.google.android.material.switchmaterial.SwitchMaterial
-                        android:id="@+id/switchTransparent"
+                    <!-- TRANSPARANLIK / OPAKLIK ORANI SLIDER -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Şeffaf Arka Plan"
-                        android:textColor="#F8FAFC"
-                        android:textSize="14sp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="4dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="💎 Arka Plan Opaklığı"
+                            android:textColor="#F8FAFC"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tvOpacityValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="%100 (Tam Opak)"
+                            android:textColor="#38BDF8"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <SeekBar
+                        android:id="@+id/sbOpacity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:max="100"
+                        android:progress="100"
+                        android:progressTint="#38BDF8"
+                        android:thumbTint="#38BDF8"
                         android:layout_marginBottom="8dp" />
 
-                    <!-- Manuel HEX Renk Girişleri -->
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/tilBgColor"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    <!-- Hızlı Opaklık Butonları -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="8dp"
-                        android:hint="Arka Plan Rengi (#RRGGBB)"
-                        app:boxStrokeColor="#6366F1"
-                        app:hintTextColor="#6366F1">
+                        android:orientation="horizontal">
 
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etBgColor"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnOp0"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="4dp"
+                            android:padding="0dp"
+                            android:text="%0 Şeffaf"
                             android:textColor="#F8FAFC"
-                            android:text="#1E1E2E" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:textSize="11sp"
+                            app:cornerRadius="10dp" />
 
-                    <com.google.android.material.textfield.TextInputLayout
-                        android:id="@+id/tilTextColor"
-                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:hint="Yazı / Vurgu Rengi (#RRGGBB)"
-                        app:boxStrokeColor="#6366F1"
-                        app:hintTextColor="#6366F1">
-
-                        <com.google.android.material.textfield.TextInputEditText
-                            android:id="@+id/etTextColor"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnOp30"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:layout_weight="1"
+                            android:layout_marginHorizontal="4dp"
+                            android:padding="0dp"
+                            android:text="%30 Cam"
                             android:textColor="#F8FAFC"
-                            android:text="#FFFFFF" />
-                    </com.google.android.material.textfield.TextInputLayout>
+                            android:textSize="11sp"
+                            app:cornerRadius="10dp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnOp70"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:layout_weight="1"
+                            android:layout_marginHorizontal="4dp"
+                            android:padding="0dp"
+                            android:text="%70 Mat"
+                            android:textColor="#F8FAFC"
+                            android:textSize="11sp"
+                            app:cornerRadius="10dp" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnOp100"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="36dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="4dp"
+                            android:padding="0dp"
+                            android:text="%100 Opak"
+                            android:textColor="#F8FAFC"
+                            android:textSize="11sp"
+                            app:cornerRadius="10dp" />
+                    </LinearLayout>
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- WIDGET ÖZEL AYARLARI -->
+            <!-- WIDGET ÖZEL AYARLAR KARTI -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -410,84 +498,26 @@
                     android:padding="16dp">
 
                     <TextView
-                        android:id="@+id/sectionTitle"
+                        android:id="@+id/tvExtraSettingsTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="⚙️ Seçili Widget Ayarları"
+                        android:text="⚙️ Widget Seçenekleri"
                         android:textColor="#F8FAFC"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:layout_marginBottom="12dp" />
 
-                    <!-- SAAT AYARLARI BÖLÜMÜ -->
+                    <!-- Hava Durumu Şehir Seçimi -->
                     <LinearLayout
-                        android:id="@+id/panelClockSettings"
+                        android:id="@+id/panelCitySettings"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical">
 
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/switchShowDate"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Tarihi Göster"
-                            android:checked="true"
-                            android:textColor="#F8FAFC"
-                            android:layout_marginBottom="8dp" />
-
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Tarih Konumu"
-                            android:textColor="#94A3B8"
-                            android:textSize="13sp"
-                            android:layout_marginBottom="4dp" />
-
-                        <RadioGroup
-                            android:id="@+id/rgDatePos"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="horizontal"
-                            android:layout_marginBottom="8dp">
-
-                            <RadioButton
-                                android:id="@+id/rbDateBottom"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Saatin Altında"
-                                android:checked="true"
-                                android:textColor="#F8FAFC"
-                                android:layout_marginEnd="16dp" />
-
-                            <RadioButton
-                                android:id="@+id/rbDateTop"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Saatin Üstünde"
-                                android:textColor="#F8FAFC" />
-                        </RadioGroup>
-
-                        <com.google.android.material.switchmaterial.SwitchMaterial
-                            android:id="@+id/switch24Hour"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="24 Saat Formatı (14:30 / 2:30)"
-                            android:checked="true"
-                            android:textColor="#F8FAFC" />
-                    </LinearLayout>
-
-                    <!-- HAVA DURUMU AYARLARI BÖLÜMÜ -->
-                    <LinearLayout
-                        android:id="@+id/panelWeatherSettings"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:visibility="gone">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Hızlı Şehir Seçimi"
+                            android:text="Şehir Seçimi (Open-Meteo Sıfır Ayar)"
                             android:textColor="#94A3B8"
                             android:textSize="13sp"
                             android:layout_marginBottom="8dp" />
@@ -496,7 +526,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:scrollbars="none"
-                            android:layout_marginBottom="12dp">
+                            android:layout_marginBottom="10dp">
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -508,30 +538,30 @@
                                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginEnd="8dp"
+                                    android:layout_marginEnd="6dp"
                                     android:text="İstanbul"
                                     android:textColor="#F8FAFC"
-                                    app:cornerRadius="16dp" />
+                                    app:cornerRadius="14dp" />
 
                                 <com.google.android.material.button.MaterialButton
                                     android:id="@+id/btnCityAnk"
                                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginEnd="8dp"
+                                    android:layout_marginEnd="6dp"
                                     android:text="Ankara"
                                     android:textColor="#F8FAFC"
-                                    app:cornerRadius="16dp" />
+                                    app:cornerRadius="14dp" />
 
                                 <com.google.android.material.button.MaterialButton
                                     android:id="@+id/btnCityIzm"
                                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:layout_marginEnd="8dp"
+                                    android:layout_marginEnd="6dp"
                                     android:text="İzmir"
                                     android:textColor="#F8FAFC"
-                                    app:cornerRadius="16dp" />
+                                    app:cornerRadius="14dp" />
 
                                 <com.google.android.material.button.MaterialButton
                                     android:id="@+id/btnCityAnt"
@@ -540,45 +570,48 @@
                                     android:layout_height="wrap_content"
                                     android:text="Antalya"
                                     android:textColor="#F8FAFC"
-                                    app:cornerRadius="16dp" />
+                                    app:cornerRadius="14dp" />
                             </LinearLayout>
                         </HorizontalScrollView>
-
-                        <com.google.android.material.textfield.TextInputLayout
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="8dp"
-                            android:hint="Şehir Adı">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/etCityName"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textColor="#F8FAFC"
-                                android:text="İSTANBUL" />
-                        </com.google.android.material.textfield.TextInputLayout>
 
                         <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnRefreshWeather"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="🔄 Hava Durumunu Şimdi Güncelle"
-                            app:cornerRadius="14dp"
-                            app:backgroundTint="#0284C7" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
-                            android:text="✓ Open-Meteo ile API anahtarı gerektirmeden 100% otomatik ve ücretsiz çeker."
-                            android:textColor="#10B981"
-                            android:textSize="12sp" />
+                            android:text="🔄 Hava Durumunu Güncelle"
+                            app:backgroundTint="#0284C7"
+                            app:cornerRadius="12dp" />
                     </LinearLayout>
 
-                    <!-- WEB BUTONU AYARLARI BÖLÜMÜ -->
+                    <!-- Saat Ayarları -->
                     <LinearLayout
-                        android:id="@+id/panelLinkSettings"
+                        android:id="@+id/panelClockExtra"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchShowDate"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Tarihi Göster"
+                            android:checked="true"
+                            android:textColor="#F8FAFC"
+                            android:layout_marginBottom="6dp" />
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switch24Hour"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="24 Saat Formatı (21:45 / 9:45 PM)"
+                            android:checked="true"
+                            android:textColor="#F8FAFC" />
+                    </LinearLayout>
+
+                    <!-- Web Butonu Ayarları -->
+                    <LinearLayout
+                        android:id="@+id/panelLinkExtra"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
@@ -588,8 +621,8 @@
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="8dp"
-                            android:hint="Açılacak Web Sitesi (URL)">
+                            android:hint="Web Sitesi Adresi (URL)"
+                            android:layout_marginBottom="8dp">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/etLinkUrl"
@@ -603,8 +636,7 @@
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginBottom="8dp"
-                            android:hint="Üzerinde Yazan Metin">
+                            android:hint="Buton Yazısı">
 
                             <com.google.android.material.textfield.TextInputEditText
                                 android:id="@+id/etLinkTop"
@@ -612,60 +644,6 @@
                                 android:layout_height="wrap_content"
                                 android:textColor="#F8FAFC"
                                 android:text="TIKLA" />
-                        </com.google.android.material.textfield.TextInputLayout>
-
-                        <com.google.android.material.textfield.TextInputLayout
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="Alt Açıklama (İsteğe bağlı)">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/etLinkLabel"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textColor="#F8FAFC"
-                                android:text="Web'i Aç" />
-                        </com.google.android.material.textfield.TextInputLayout>
-                    </LinearLayout>
-
-                    <!-- TAKVİM AYARLARI BÖLÜMÜ -->
-                    <LinearLayout
-                        android:id="@+id/panelCalendarSettings"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:visibility="gone">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="iPhone Tarzı Klasik Takvim Kartı (2x2)"
-                            android:textColor="#F8FAFC"
-                            android:textSize="14sp"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="4dp" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="• Tıklayınca Samsung Takvim (veya sistem takvimini) açar.\n• Ayın tüm günlerini şık bir iOS kartında gösterir.\n• Bugünün tarihi kırmızı/özel renkli halka rozetle vurgulanır."
-                            android:textColor="#94A3B8"
-                            android:textSize="12sp"
-                            android:layout_marginBottom="8dp" />
-
-                        <com.google.android.material.textfield.TextInputLayout
-                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="Başlık &amp; Bugün Vurgu Rengi (#RRGGBB)">
-
-                            <com.google.android.material.textfield.TextInputEditText
-                                android:id="@+id/etCalAccent"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textColor="#F8FAFC"
-                                android:text="#E53935" />
                         </com.google.android.material.textfield.TextInputLayout>
                     </LinearLayout>
 
@@ -690,10 +668,10 @@
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:text="📌 BU WIDGET'I ANA EKRANA EKLE"
+                android:text="📌 BU WIDGET'I ANA EKRANA EKLE (ONE UI 8.5)"
                 android:textColor="#38BDF8"
                 android:textStyle="bold"
-                android:textSize="15sp"
+                android:textSize="14sp"
                 app:strokeColor="#38BDF8"
                 app:strokeWidth="1.5dp"
                 app:cornerRadius="16dp"

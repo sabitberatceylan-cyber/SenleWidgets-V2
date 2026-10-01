@@ -32,9 +32,13 @@ class ConfigActivity : AppCompatActivity() {
         val appWidgetInfo = AppWidgetManager.getInstance(this).getAppWidgetInfo(appWidgetId)
         val className = appWidgetInfo?.provider?.className ?: ""
 
+        val isIos = className.contains("Ios")
         val type = when {
-            className.contains("Clock") -> "clock"
+            className.contains("Calendar") -> "calendar"
             className.contains("Weather") -> "weather"
+            className.contains("Battery") -> "battery"
+            className.contains("Clock") -> "clock"
+            className.contains("Notes") -> "notes"
             className.contains("Link") -> "link"
             else -> "calendar"
         }
@@ -61,68 +65,68 @@ class ConfigActivity : AppCompatActivity() {
             return et
         }
 
-        fun addSwitch(label: String, key: String, defVal: Boolean): SwitchMaterial {
-            val sw = SwitchMaterial(this).apply {
-                text = label
-                setTextColor(Color.parseColor("#F8FAFC"))
-                isChecked = P.b(this@ConfigActivity, appWidgetId, key, defVal)
-                setPadding(0, 12, 0, 12)
+        fun addOpacitySeeker(key: String, defVal: Int) {
+            val tv = TextView(this).apply {
+                val cur = P.i(this@ConfigActivity, appWidgetId, key, defVal)
+                text = "Arka Plan Opaklığı: %$cur"
+                setTextColor(Color.parseColor("#38BDF8"))
+                setPadding(0, 12, 0, 4)
             }
-            container.addView(sw)
-            saves.add { P.put(this@ConfigActivity, appWidgetId, key, sw.isChecked) }
-            return sw
+            container.addView(tv)
+            val sb = SeekBar(this).apply {
+                max = 100
+                progress = P.i(this@ConfigActivity, appWidgetId, key, defVal)
+                setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                    override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                        tv.text = if (progress == 0) "Arka Plan: %0 (Tamamen Şeffaf)" else "Arka Plan Opaklığı: %$progress"
+                    }
+                    override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+                    override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+                })
+            }
+            container.addView(sb)
+            saves.add { P.put(this@ConfigActivity, appWidgetId, key, sb.progress) }
         }
 
+        titleView.text = if (isIos) "🍎 iOS Widget Yapılandırması" else "⚙️ Widget Yapılandırması"
+
         when (type) {
-            "clock" -> {
-                titleView.text = "🕒 Saat Widget Ayarları"
-                addSwitch("Tarihi Göster", "clock_showDate", true)
-
-                val labelPos = TextView(this).apply {
-                    text = "Tarih Konumu"
-                    setTextColor(Color.parseColor("#94A3B8"))
-                    setPadding(0, 12, 0, 4)
-                }
-                container.addView(labelPos)
-
-                val rg = RadioGroup(this).apply { orientation = LinearLayout.HORIZONTAL }
-                val rbBottom = RadioButton(this).apply { text = "Saatin Altında"; setTextColor(Color.WHITE) }
-                val rbTop = RadioButton(this).apply { text = "Saatin Üstünde"; setTextColor(Color.WHITE) }
-                rg.addView(rbBottom)
-                rg.addView(rbTop)
-                container.addView(rg)
-
-                val curPos = P.s(this, appWidgetId, "clock_pos", "bottom")
-                if (curPos == "top") rbTop.isChecked = true else rbBottom.isChecked = true
-                saves.add { P.put(this, appWidgetId, "clock_pos", if (rbTop.isChecked) "top" else "bottom") }
-
-                addSwitch("24 Saat Formatı", "clock_h24", true)
-                addSwitch("Şeffaf Arka Plan", "clock_transp", false)
-                addEditText("Arka Plan Rengi (#RRGGBB)", "clock_bg", "#1E1E2E")
-                addEditText("Yazı Rengi (#RRGGBB)", "clock_text", "#FFFFFF")
+            "calendar" -> {
+                addEditText("Kart Arka Plan Rengi", if (isIos) "cal_bg" else "cal_bg", "#FFFFFF")
+                addEditText("Başlık / Vurgu Rengi", "cal_head", "#E53935")
+                addEditText("Gün Sayıları Rengi", "cal_text", "#1C1C1E")
+                addOpacitySeeker("cal_opacity", 100)
             }
             "weather" -> {
-                titleView.text = "⛅ Hava Durumu Ayarları"
                 addEditText("Şehir Adı", "city", "İSTANBUL")
-                addSwitch("Şeffaf Arka Plan", "weather_transp", false)
-                addEditText("Arka Plan Rengi (#RRGGBB)", "weather_bg", "#1565C0")
-                addEditText("Yazı Rengi (#RRGGBB)", "weather_text", "#FFFFFF")
+                addEditText("Arka Plan Rengi", if (isIos) "ios_w_bg" else "weather_bg", if (isIos) "#1E3A8A" else "#1565C0")
+                addEditText("Yazı Rengi", if (isIos) "ios_w_text" else "weather_text", "#FFFFFF")
+                addOpacitySeeker(if (isIos) "ios_w_opacity" else "weather_opacity", 100)
+            }
+            "battery" -> {
+                addEditText("Arka Plan Rengi", "ios_bat_bg", "#1C1C1E")
+                addEditText("Yazı Rengi", "ios_bat_text", "#FFFFFF")
+                addEditText("Vurgu Rengi", "ios_bat_accent", "#34C759")
+                addOpacitySeeker("ios_bat_opacity", 100)
+            }
+            "clock" -> {
+                addEditText("Arka Plan Rengi", if (isIos) "ios_clk_bg" else "clock_bg", if (isIos) "#18181B" else "#1E1E2E")
+                addEditText("Yazı Rengi", if (isIos) "ios_clk_text" else "clock_text", "#FFFFFF")
+                addOpacitySeeker(if (isIos) "ios_clk_opacity" else "clock_opacity", 100)
+            }
+            "notes" -> {
+                addEditText("Arka Plan Rengi", "ios_notes_bg", "#1C1C1E")
+                addEditText("Yazı Rengi", "ios_notes_text", "#FFFFFF")
+                addEditText("1. Hatırlatıcı", "ios_note_1", "✓ Günlük Görevleri Tamamla")
+                addEditText("2. Hatırlatıcı", "ios_note_2", "✓ Toplantı ve Planlar")
+                addOpacitySeeker("ios_notes_opacity", 100)
             }
             "link" -> {
-                titleView.text = "🔗 Web Butonu Ayarları"
-                addEditText("Açılacak Web Sitesi (URL)", "link_url", "https://www.google.com")
+                addEditText("Web Adresi (URL)", "link_url", "https://www.google.com")
                 addEditText("Buton Yazısı", "link_top", "TIKLA")
-                addEditText("Alt Açıklama", "link_label", "Web'i Aç")
-                addSwitch("Şeffaf Arka Plan", "link_transp", false)
-                addEditText("Arka Plan Rengi (#RRGGBB)", "link_bg", "#4F46E5")
-                addEditText("Yazı Rengi (#RRGGBB)", "link_text", "#FFFFFF")
-            }
-            "calendar" -> {
-                titleView.text = "📅 Klasik Takvim Ayarları (2x2)"
-                addSwitch("Şeffaf Arka Plan", "cal_transp", false)
-                addEditText("Kart Arka Plan Rengi (#RRGGBB)", "cal_bg", "#FFFFFF")
-                addEditText("Başlık & Bugün Rozet Rengi", "cal_head", "#E53935")
-                addEditText("Gün Sayıları Rengi", "cal_text", "#1C1C1E")
+                addEditText("Arka Plan Rengi", "link_bg", "#4F46E5")
+                addEditText("Yazı Rengi", "link_text", "#FFFFFF")
+                addOpacitySeeker("link_opacity", 100)
             }
         }
 

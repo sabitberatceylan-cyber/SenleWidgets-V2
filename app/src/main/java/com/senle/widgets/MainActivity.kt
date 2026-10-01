@@ -1,5 +1,6 @@
 package com.senle.widgets
 
+import android.app.Dialog
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.graphics.Color
@@ -12,69 +13,53 @@ import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.card.MaterialCardView
 import com.google.android.material.switchmaterial.SwitchMaterial
 import com.google.android.material.textfield.TextInputEditText
 
 class MainActivity : AppCompatActivity() {
 
-    private var currentTab = "clock" // "clock", "weather", "link", "calendar"
+    private var activeCategory = "ios" // "ios" or "standard"
+    private var activeWidget = "ios_calendar" // "ios_calendar", "ios_weather", "ios_battery", "ios_clock", "ios_notes", "clock", "weather", "link", "date"
 
-    // Preview views
-    private lateinit var previewContainerCard: MaterialCardView
-    private lateinit var previewClock: LinearLayout
-    private lateinit var previewClockDateTop: TextView
-    private lateinit var previewClockTime: TextView
-    private lateinit var previewClockDateBottom: TextView
+    // Views
+    private lateinit var btnCatIos: MaterialButton
+    private lateinit var btnCatStandard: MaterialButton
+    private lateinit var scrollIosTabs: View
+    private lateinit var scrollStdTabs: View
 
-    private lateinit var previewWeather: LinearLayout
-    private lateinit var previewWeatherCity: TextView
-    private lateinit var previewWeatherTemp: TextView
-    private lateinit var previewWeatherDesc: TextView
+    // iOS tab buttons
+    private lateinit var btnIosTabCal: MaterialButton
+    private lateinit var btnIosTabWeather: MaterialButton
+    private lateinit var btnIosTabBattery: MaterialButton
+    private lateinit var btnIosTabClock: MaterialButton
+    private lateinit var btnIosTabNotes: MaterialButton
 
-    private lateinit var previewLink: LinearLayout
-    private lateinit var previewLinkTop: TextView
-    private lateinit var previewLinkLabel: TextView
+    // Standard tab buttons
+    private lateinit var btnStdTabClock: MaterialButton
+    private lateinit var btnStdTabWeather: MaterialButton
+    private lateinit var btnStdTabLink: MaterialButton
+    private lateinit var btnStdTabCal: MaterialButton
 
-    private lateinit var previewCalendar: ImageView
+    // Live preview
+    private lateinit var ivLivePreview: ImageView
 
-    // Tabs
-    private lateinit var btnTabClock: MaterialButton
-    private lateinit var btnTabWeather: MaterialButton
-    private lateinit var btnTabLink: MaterialButton
-    private lateinit var btnTabCalendar: MaterialButton
+    // Color pickers & Opacity
+    private lateinit var btnPickBgColor: MaterialButton
+    private lateinit var btnPickTextColor: MaterialButton
+    private lateinit var btnPickAccentColor: MaterialButton
+    private lateinit var tvOpacityValue: TextView
+    private lateinit var sbOpacity: SeekBar
 
-    // Color inputs
-    private lateinit var etBgColor: TextInputEditText
-    private lateinit var etTextColor: TextInputEditText
-    private lateinit var switchTransparent: SwitchMaterial
-
-    // Settings Panels
-    private lateinit var panelClockSettings: LinearLayout
-    private lateinit var panelWeatherSettings: LinearLayout
-    private lateinit var panelLinkSettings: LinearLayout
-    private lateinit var panelCalendarSettings: LinearLayout
-
-    // Clock inputs
+    // Extra panels
+    private lateinit var panelCitySettings: LinearLayout
+    private lateinit var panelClockExtra: LinearLayout
+    private lateinit var panelLinkExtra: LinearLayout
     private lateinit var switchShowDate: SwitchMaterial
-    private lateinit var rgDatePos: RadioGroup
-    private lateinit var rbDateTop: RadioButton
-    private lateinit var rbDateBottom: RadioButton
     private lateinit var switch24Hour: SwitchMaterial
-
-    // Weather inputs
-    private lateinit var etCityName: TextInputEditText
-    private lateinit var btnRefreshWeather: MaterialButton
-
-    // Link inputs
     private lateinit var etLinkUrl: TextInputEditText
     private lateinit var etLinkTop: TextInputEditText
-    private lateinit var etLinkLabel: TextInputEditText
 
-    // Calendar inputs
-    private lateinit var etCalAccent: TextInputEditText
-
-    // Actions
+    // Main action buttons
     private lateinit var btnSaveAndApply: MaterialButton
     private lateinit var btnPinWidget: MaterialButton
 
@@ -83,316 +68,549 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         initViews()
-        setupTabs()
-        setupColorPresets()
-        setupListeners()
-        loadPreferencesForTab(currentTab)
+        setupCategoryTabs()
+        setupWidgetTabs()
+        setupColorAndOpacityControls()
+        setupExtraOptions()
+        setupActionButtons()
+
+        refreshCurrentTabUi()
         updateLivePreview()
     }
 
     private fun initViews() {
-        previewContainerCard = findViewById(R.id.previewContainerCard)
-        previewClock = findViewById(R.id.previewClock)
-        previewClockDateTop = findViewById(R.id.previewClockDateTop)
-        previewClockTime = findViewById(R.id.previewClockTime)
-        previewClockDateBottom = findViewById(R.id.previewClockDateBottom)
+        btnCatIos = findViewById(R.id.btnCatIos)
+        btnCatStandard = findViewById(R.id.btnCatStandard)
+        scrollIosTabs = findViewById(R.id.scrollIosTabs)
+        scrollStdTabs = findViewById(R.id.scrollStdTabs)
 
-        previewWeather = findViewById(R.id.previewWeather)
-        previewWeatherCity = findViewById(R.id.previewWeatherCity)
-        previewWeatherTemp = findViewById(R.id.previewWeatherTemp)
-        previewWeatherDesc = findViewById(R.id.previewWeatherDesc)
+        btnIosTabCal = findViewById(R.id.btnIosTabCal)
+        btnIosTabWeather = findViewById(R.id.btnIosTabWeather)
+        btnIosTabBattery = findViewById(R.id.btnIosTabBattery)
+        btnIosTabClock = findViewById(R.id.btnIosTabClock)
+        btnIosTabNotes = findViewById(R.id.btnIosTabNotes)
 
-        previewLink = findViewById(R.id.previewLink)
-        previewLinkTop = findViewById(R.id.previewLinkTop)
-        previewLinkLabel = findViewById(R.id.previewLinkLabel)
+        btnStdTabClock = findViewById(R.id.btnStdTabClock)
+        btnStdTabWeather = findViewById(R.id.btnStdTabWeather)
+        btnStdTabLink = findViewById(R.id.btnStdTabLink)
+        btnStdTabCal = findViewById(R.id.btnStdTabCal)
 
-        previewCalendar = findViewById(R.id.previewCalendar)
+        ivLivePreview = findViewById(R.id.ivLivePreview)
 
-        btnTabClock = findViewById(R.id.btnTabClock)
-        btnTabWeather = findViewById(R.id.btnTabWeather)
-        btnTabLink = findViewById(R.id.btnTabLink)
-        btnTabCalendar = findViewById(R.id.btnTabCalendar)
+        btnPickBgColor = findViewById(R.id.btnPickBgColor)
+        btnPickTextColor = findViewById(R.id.btnPickTextColor)
+        btnPickAccentColor = findViewById(R.id.btnPickAccentColor)
+        tvOpacityValue = findViewById(R.id.tvOpacityValue)
+        sbOpacity = findViewById(R.id.sbOpacity)
 
-        etBgColor = findViewById(R.id.etBgColor)
-        etTextColor = findViewById(R.id.etTextColor)
-        switchTransparent = findViewById(R.id.switchTransparent)
-
-        panelClockSettings = findViewById(R.id.panelClockSettings)
-        panelWeatherSettings = findViewById(R.id.panelWeatherSettings)
-        panelLinkSettings = findViewById(R.id.panelLinkSettings)
-        panelCalendarSettings = findViewById(R.id.panelCalendarSettings)
-
+        panelCitySettings = findViewById(R.id.panelCitySettings)
+        panelClockExtra = findViewById(R.id.panelClockExtra)
+        panelLinkExtra = findViewById(R.id.panelLinkExtra)
         switchShowDate = findViewById(R.id.switchShowDate)
-        rgDatePos = findViewById(R.id.rgDatePos)
-        rbDateTop = findViewById(R.id.rbDateTop)
-        rbDateBottom = findViewById(R.id.rbDateBottom)
         switch24Hour = findViewById(R.id.switch24Hour)
-
-        etCityName = findViewById(R.id.etCityName)
-        btnRefreshWeather = findViewById(R.id.btnRefreshWeather)
-
         etLinkUrl = findViewById(R.id.etLinkUrl)
         etLinkTop = findViewById(R.id.etLinkTop)
-        etLinkLabel = findViewById(R.id.etLinkLabel)
-
-        etCalAccent = findViewById(R.id.etCalAccent)
 
         btnSaveAndApply = findViewById(R.id.btnSaveAndApply)
         btnPinWidget = findViewById(R.id.btnPinWidget)
     }
 
-    private fun setupTabs() {
-        val tabs = listOf(
-            btnTabClock to "clock",
-            btnTabWeather to "weather",
-            btnTabLink to "link",
-            btnTabCalendar to "calendar"
-        )
+    private fun setupCategoryTabs() {
+        btnCatIos.setOnClickListener {
+            activeCategory = "ios"
+            activeWidget = "ios_calendar"
+            refreshCurrentTabUi()
+            updateLivePreview()
+        }
+        btnCatStandard.setOnClickListener {
+            activeCategory = "standard"
+            activeWidget = "clock"
+            refreshCurrentTabUi()
+            updateLivePreview()
+        }
+    }
 
-        for ((btn, tab) in tabs) {
+    private fun setupWidgetTabs() {
+        val iosTabs = listOf(
+            btnIosTabCal to "ios_calendar",
+            btnIosTabWeather to "ios_weather",
+            btnIosTabBattery to "ios_battery",
+            btnIosTabClock to "ios_clock",
+            btnIosTabNotes to "ios_notes"
+        )
+        for ((btn, type) in iosTabs) {
             btn.setOnClickListener {
-                if (currentTab != tab) {
-                    currentTab = tab
-                    updateTabStyles()
-                    loadPreferencesForTab(tab)
-                    updateLivePreview()
-                }
+                activeWidget = type
+                refreshCurrentTabUi()
+                updateLivePreview()
+            }
+        }
+
+        val stdTabs = listOf(
+            btnStdTabClock to "clock",
+            btnStdTabWeather to "weather",
+            btnStdTabLink to "link",
+            btnStdTabCal to "date"
+        )
+        for ((btn, type) in stdTabs) {
+            btn.setOnClickListener {
+                activeWidget = type
+                refreshCurrentTabUi()
+                updateLivePreview()
             }
         }
     }
 
-    private fun updateTabStyles() {
-        val tabMap = mapOf(
-            btnTabClock to "clock",
-            btnTabWeather to "weather",
-            btnTabLink to "link",
-            btnTabCalendar to "calendar"
+    private fun refreshCurrentTabUi() {
+        // Kategori stilleri
+        if (activeCategory == "ios") {
+            btnCatIos.setBackgroundColor(Color.parseColor("#6366F1"))
+            btnCatIos.setTextColor(Color.WHITE)
+            btnCatStandard.setBackgroundColor(Color.TRANSPARENT)
+            btnCatStandard.setTextColor(Color.parseColor("#F8FAFC"))
+            scrollIosTabs.visibility = View.VISIBLE
+            scrollStdTabs.visibility = View.GONE
+        } else {
+            btnCatStandard.setBackgroundColor(Color.parseColor("#6366F1"))
+            btnCatStandard.setTextColor(Color.WHITE)
+            btnCatIos.setBackgroundColor(Color.TRANSPARENT)
+            btnCatIos.setTextColor(Color.parseColor("#F8FAFC"))
+            scrollStdTabs.visibility = View.VISIBLE
+            scrollIosTabs.visibility = View.GONE
+        }
+
+        // Widget sekmeleri stilleri
+        val allTabs = listOf(
+            btnIosTabCal to "ios_calendar",
+            btnIosTabWeather to "ios_weather",
+            btnIosTabBattery to "ios_battery",
+            btnIosTabClock to "ios_clock",
+            btnIosTabNotes to "ios_notes",
+            btnStdTabClock to "clock",
+            btnStdTabWeather to "weather",
+            btnStdTabLink to "link",
+            btnStdTabCal to "date"
         )
-        for ((btn, tab) in tabMap) {
-            if (tab == currentTab) {
-                btn.setBackgroundColor(Color.parseColor("#6366F1"))
-                btn.setTextColor(Color.WHITE)
+        for ((btn, type) in allTabs) {
+            if (type == activeWidget) {
+                btn.setBackgroundColor(Color.parseColor("#38BDF8"))
+                btn.setTextColor(Color.parseColor("#0F172A"))
             } else {
                 btn.setBackgroundColor(Color.TRANSPARENT)
                 btn.setTextColor(Color.parseColor("#F8FAFC"))
             }
         }
 
-        panelClockSettings.visibility = if (currentTab == "clock") View.VISIBLE else View.GONE
-        panelWeatherSettings.visibility = if (currentTab == "weather") View.VISIBLE else View.GONE
-        panelLinkSettings.visibility = if (currentTab == "link") View.VISIBLE else View.GONE
-        panelCalendarSettings.visibility = if (currentTab == "calendar") View.VISIBLE else View.GONE
+        // Ekstra panel görünürlükleri
+        panelCitySettings.visibility = if (activeWidget.contains("weather")) View.VISIBLE else View.GONE
+        panelClockExtra.visibility = if (activeWidget == "clock") View.VISIBLE else View.GONE
+        panelLinkExtra.visibility = if (activeWidget == "link") View.VISIBLE else View.GONE
 
-        previewClock.visibility = if (currentTab == "clock") View.VISIBLE else View.GONE
-        previewWeather.visibility = if (currentTab == "weather") View.VISIBLE else View.GONE
-        previewLink.visibility = if (currentTab == "link") View.VISIBLE else View.GONE
-        previewCalendar.visibility = if (currentTab == "calendar") View.VISIBLE else View.GONE
+        // Aktif widget için opacity yükle
+        val currentOpacity = getOpacityForWidget(activeWidget)
+        sbOpacity.progress = currentOpacity
+        updateOpacityText(currentOpacity)
     }
 
-    private fun setupColorPresets() {
-        val presets = mapOf(
-            R.id.colorRed to "#EF4444",
-            R.id.colorBlue to "#1565C0",
-            R.id.colorGreen to "#10B981",
-            R.id.colorPurple to "#7C3AED",
-            R.id.colorAmber to "#F59E0B",
-            R.id.colorDark to "#1E1E2E",
-            R.id.colorWhite to "#FFFFFF"
-        )
-        for ((btnId, hex) in presets) {
-            findViewById<MaterialButton>(btnId).setOnClickListener {
-                etBgColor.setText(hex)
-                if (hex == "#FFFFFF") {
-                    etTextColor.setText("#1C1C1E")
-                } else if (hex == "#1E1E2E" || hex == "#1565C0" || hex == "#7C3AED") {
-                    etTextColor.setText("#FFFFFF")
-                }
-                switchTransparent.isChecked = false
+    private fun getOpacityForWidget(type: String): Int {
+        val key = when (type) {
+            "ios_calendar" -> "cal_opacity"
+            "ios_weather" -> "ios_w_opacity"
+            "ios_battery" -> "ios_bat_opacity"
+            "ios_clock" -> "ios_clk_opacity"
+            "ios_notes" -> "ios_notes_opacity"
+            "clock" -> "clock_opacity"
+            "weather" -> "weather_opacity"
+            "link" -> "link_opacity"
+            else -> "cal_opacity"
+        }
+        return P.i(this, 0, key, 100)
+    }
+
+    private fun setOpacityForWidget(type: String, value: Int) {
+        val key = when (type) {
+            "ios_calendar" -> "cal_opacity"
+            "ios_weather" -> "ios_w_opacity"
+            "ios_battery" -> "ios_bat_opacity"
+            "ios_clock" -> "ios_clk_opacity"
+            "ios_notes" -> "ios_notes_opacity"
+            "clock" -> "clock_opacity"
+            "weather" -> "weather_opacity"
+            "link" -> "link_opacity"
+            else -> "cal_opacity"
+        }
+        P.put(this, 0, key, value)
+    }
+
+    private fun getBgColorForWidget(type: String): String {
+        return when (type) {
+            "ios_calendar" -> P.s(this, 0, "cal_bg", "#FFFFFF")
+            "ios_weather" -> P.s(this, 0, "ios_w_bg", "#1E3A8A")
+            "ios_battery" -> P.s(this, 0, "ios_bat_bg", "#1C1C1E")
+            "ios_clock" -> P.s(this, 0, "ios_clk_bg", "#18181B")
+            "ios_notes" -> P.s(this, 0, "ios_notes_bg", "#1C1C1E")
+            "clock" -> P.s(this, 0, "clock_bg", "#1E1E2E")
+            "weather" -> P.s(this, 0, "weather_bg", "#1565C0")
+            "link" -> P.s(this, 0, "link_bg", "#4F46E5")
+            else -> P.s(this, 0, "cal_bg", "#FFFFFF")
+        }
+    }
+
+    private fun setBgColorForWidget(type: String, hex: String) {
+        val key = when (type) {
+            "ios_calendar" -> "cal_bg"
+            "ios_weather" -> "ios_w_bg"
+            "ios_battery" -> "ios_bat_bg"
+            "ios_clock" -> "ios_clk_bg"
+            "ios_notes" -> "ios_notes_bg"
+            "clock" -> "clock_bg"
+            "weather" -> "weather_bg"
+            "link" -> "link_bg"
+            else -> "cal_bg"
+        }
+        P.put(this, 0, key, hex)
+    }
+
+    private fun getTextColorForWidget(type: String): String {
+        return when (type) {
+            "ios_calendar" -> P.s(this, 0, "cal_text", "#1C1C1E")
+            "ios_weather" -> P.s(this, 0, "ios_w_text", "#FFFFFF")
+            "ios_battery" -> P.s(this, 0, "ios_bat_text", "#FFFFFF")
+            "ios_clock" -> P.s(this, 0, "ios_clk_text", "#FFFFFF")
+            "ios_notes" -> P.s(this, 0, "ios_notes_text", "#FFFFFF")
+            "clock" -> P.s(this, 0, "clock_text", "#FFFFFF")
+            "weather" -> P.s(this, 0, "weather_text", "#FFFFFF")
+            "link" -> P.s(this, 0, "link_text", "#FFFFFF")
+            else -> P.s(this, 0, "cal_text", "#1C1C1E")
+        }
+    }
+
+    private fun setTextColorForWidget(type: String, hex: String) {
+        val key = when (type) {
+            "ios_calendar" -> "cal_text"
+            "ios_weather" -> "ios_w_text"
+            "ios_battery" -> "ios_bat_text"
+            "ios_clock" -> "ios_clk_text"
+            "ios_notes" -> "ios_notes_text"
+            "clock" -> "clock_text"
+            "weather" -> "weather_text"
+            "link" -> "link_text"
+            else -> "cal_text"
+        }
+        P.put(this, 0, key, hex)
+    }
+
+    private fun getAccentColorForWidget(type: String): String {
+        return when (type) {
+            "ios_calendar" -> P.s(this, 0, "cal_head", "#E53935")
+            "ios_weather" -> "#38BDF8"
+            "ios_battery" -> P.s(this, 0, "ios_bat_accent", "#34C759")
+            "ios_clock" -> P.s(this, 0, "ios_clk_accent", "#FF9500")
+            "ios_notes" -> P.s(this, 0, "ios_notes_accent", "#0A84FF")
+            else -> "#EF4444"
+        }
+    }
+
+    private fun setAccentColorForWidget(type: String, hex: String) {
+        val key = when (type) {
+            "ios_calendar" -> "cal_head"
+            "ios_battery" -> "ios_bat_accent"
+            "ios_clock" -> "ios_clk_accent"
+            "ios_notes" -> "ios_notes_accent"
+            else -> "cal_head"
+        }
+        P.put(this, 0, key, hex)
+        if (type == "ios_calendar") {
+            P.put(this, 0, "cal_circle", hex)
+        }
+    }
+
+    private fun setupColorAndOpacityControls() {
+        btnPickBgColor.setOnClickListener {
+            val currentHex = getBgColorForWidget(activeWidget)
+            showColorPickerDialog("Arka Plan Rengi Seç", currentHex) { newHex ->
+                setBgColorForWidget(activeWidget, newHex)
                 updateLivePreview()
             }
         }
 
+        btnPickTextColor.setOnClickListener {
+            val currentHex = getTextColorForWidget(activeWidget)
+            showColorPickerDialog("Yazı / Metin Rengi Seç", currentHex) { newHex ->
+                setTextColorForWidget(activeWidget, newHex)
+                updateLivePreview()
+            }
+        }
+
+        btnPickAccentColor.setOnClickListener {
+            val currentHex = getAccentColorForWidget(activeWidget)
+            showColorPickerDialog("Vurgu / Rozet / İkon Rengi Seç", currentHex) { newHex ->
+                setAccentColorForWidget(activeWidget, newHex)
+                updateLivePreview()
+            }
+        }
+
+        // Hızlı tema renkleri
+        val quickColors = mapOf(
+            R.id.quickRed to "#FF3B30",
+            R.id.quickBlue to "#007AFF",
+            R.id.quickGreen to "#34C759",
+            R.id.quickPurple to "#AF52DE",
+            R.id.quickAmber to "#FF9500",
+            R.id.quickDark to "#1C1C1E",
+            R.id.quickWhite to "#FFFFFF"
+        )
+        for ((btnId, hex) in quickColors) {
+            findViewById<MaterialButton>(btnId).setOnClickListener {
+                setBgColorForWidget(activeWidget, hex)
+                if (hex == "#FFFFFF") {
+                    setTextColorForWidget(activeWidget, "#1C1C1E")
+                } else if (hex == "#1C1C1E" || hex == "#FF3B30" || hex == "#007AFF" || hex == "#AF52DE") {
+                    setTextColorForWidget(activeWidget, "#FFFFFF")
+                }
+                updateLivePreview()
+            }
+        }
+
+        // Opaklık SeekBar'ı
+        sbOpacity.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                updateOpacityText(progress)
+                if (fromUser) {
+                    setOpacityForWidget(activeWidget, progress)
+                    updateLivePreview()
+                }
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
+        // Hızlı Opaklık Butonları
+        findViewById<MaterialButton>(R.id.btnOp0).setOnClickListener { setOpacity(0) }
+        findViewById<MaterialButton>(R.id.btnOp30).setOnClickListener { setOpacity(30) }
+        findViewById<MaterialButton>(R.id.btnOp70).setOnClickListener { setOpacity(70) }
+        findViewById<MaterialButton>(R.id.btnOp100).setOnClickListener { setOpacity(100) }
+    }
+
+    private fun setOpacity(op: Int) {
+        sbOpacity.progress = op
+        updateOpacityText(op)
+        setOpacityForWidget(activeWidget, op)
+        updateLivePreview()
+    }
+
+    private fun updateOpacityText(op: Int) {
+        tvOpacityValue.text = when (op) {
+            0 -> "%0 (Tamamen Şeffaf)"
+            in 1..39 -> "%$op (Buzlu Cam)"
+            in 40..89 -> "%$op (Yarı Şeffaf)"
+            else -> "%$op (Tam Opak)"
+        }
+    }
+
+    private fun setupExtraOptions() {
         findViewById<MaterialButton>(R.id.btnCityIst).setOnClickListener { setCity("İSTANBUL", "41.0082", "28.9784") }
         findViewById<MaterialButton>(R.id.btnCityAnk).setOnClickListener { setCity("ANKARA", "39.9334", "32.8597") }
         findViewById<MaterialButton>(R.id.btnCityIzm).setOnClickListener { setCity("İZMİR", "38.4237", "27.1428") }
         findViewById<MaterialButton>(R.id.btnCityAnt).setOnClickListener { setCity("ANTALYA", "36.8969", "30.7133") }
+
+        findViewById<MaterialButton>(R.id.btnRefreshWeather).setOnClickListener {
+            Thread {
+                U.fetchWeather(this)
+                runOnUiThread {
+                    Toast.makeText(this, "Hava durumu başarıyla yenilendi!", Toast.LENGTH_SHORT).show()
+                    updateLivePreview()
+                }
+            }.start()
+        }
+
+        val watcher = object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) { updateLivePreview() }
+            override fun afterTextChanged(s: Editable?) {}
+        }
+        etLinkUrl.addTextChangedListener(watcher)
+        etLinkTop.addTextChangedListener(watcher)
+        switchShowDate.setOnCheckedChangeListener { _, _ -> updateLivePreview() }
+        switch24Hour.setOnCheckedChangeListener { _, _ -> updateLivePreview() }
     }
 
     private fun setCity(name: String, lat: String, lon: String) {
-        etCityName.setText(name)
         P.put(this, 0, "city", name)
         P.put(this, 0, "lat", lat)
         P.put(this, 0, "lon", lon)
-        refreshWeatherAsync()
-    }
-
-    private fun setupListeners() {
-        val watcher = object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
-                updateLivePreview()
-            }
-            override fun afterTextChanged(s: Editable?) {}
-        }
-
-        etBgColor.addTextChangedListener(watcher)
-        etTextColor.addTextChangedListener(watcher)
-        etLinkTop.addTextChangedListener(watcher)
-        etLinkLabel.addTextChangedListener(watcher)
-        etCityName.addTextChangedListener(watcher)
-        etCalAccent.addTextChangedListener(watcher)
-
-        switchTransparent.setOnCheckedChangeListener { _, _ -> updateLivePreview() }
-        switchShowDate.setOnCheckedChangeListener { _, _ -> updateLivePreview() }
-        rgDatePos.setOnCheckedChangeListener { _, _ -> updateLivePreview() }
-        switch24Hour.setOnCheckedChangeListener { _, _ -> updateLivePreview() }
-
-        btnRefreshWeather.setOnClickListener {
-            refreshWeatherAsync()
-        }
-
-        btnSaveAndApply.setOnClickListener {
-            saveCurrentTabSettings()
-            U.updateAll(this)
-            Toast.makeText(this, "Tüm widget ayarları kaydedildi ve güncellendi!", Toast.LENGTH_SHORT).show()
-        }
-
-        btnPinWidget.setOnClickListener {
-            showPinWidgetDialog()
-        }
-    }
-
-    private fun loadPreferencesForTab(tab: String) {
-        when (tab) {
-            "clock" -> {
-                etBgColor.setText(P.s(this, 0, "clock_bg", "#1E1E2E"))
-                etTextColor.setText(P.s(this, 0, "clock_text", "#FFFFFF"))
-                switchTransparent.isChecked = P.b(this, 0, "clock_transp", false)
-                switchShowDate.isChecked = P.b(this, 0, "clock_showDate", true)
-                val pos = P.s(this, 0, "clock_pos", "bottom")
-                if (pos == "top") rbDateTop.isChecked = true else rbDateBottom.isChecked = true
-                switch24Hour.isChecked = P.b(this, 0, "clock_h24", true)
-            }
-            "weather" -> {
-                etBgColor.setText(P.s(this, 0, "weather_bg", "#1565C0"))
-                etTextColor.setText(P.s(this, 0, "weather_text", "#FFFFFF"))
-                switchTransparent.isChecked = P.b(this, 0, "weather_transp", false)
-                etCityName.setText(P.s(this, 0, "city", "İSTANBUL"))
-            }
-            "link" -> {
-                etBgColor.setText(P.s(this, 0, "link_bg", "#4F46E5"))
-                etTextColor.setText(P.s(this, 0, "link_text", "#FFFFFF"))
-                switchTransparent.isChecked = P.b(this, 0, "link_transp", false)
-                etLinkUrl.setText(P.s(this, 0, "link_url", "https://www.google.com"))
-                etLinkTop.setText(P.s(this, 0, "link_top", "TIKLA"))
-                etLinkLabel.setText(P.s(this, 0, "link_label", "Web'i Aç"))
-            }
-            "calendar" -> {
-                etBgColor.setText(P.s(this, 0, "cal_bg", "#FFFFFF"))
-                etTextColor.setText(P.s(this, 0, "cal_text", "#1C1C1E"))
-                switchTransparent.isChecked = P.b(this, 0, "cal_transp", false)
-                etCalAccent.setText(P.s(this, 0, "cal_head", "#E53935"))
-            }
-        }
-    }
-
-    private fun saveCurrentTabSettings() {
-        val bg = etBgColor.text.toString().trim()
-        val text = etTextColor.text.toString().trim()
-        val isTransp = switchTransparent.isChecked
-
-        when (currentTab) {
-            "clock" -> {
-                P.put(this, 0, "clock_bg", bg)
-                P.put(this, 0, "clock_text", text)
-                P.put(this, 0, "clock_transp", isTransp)
-                P.put(this, 0, "clock_showDate", switchShowDate.isChecked)
-                P.put(this, 0, "clock_pos", if (rbDateTop.isChecked) "top" else "bottom")
-                P.put(this, 0, "clock_h24", switch24Hour.isChecked)
-            }
-            "weather" -> {
-                P.put(this, 0, "weather_bg", bg)
-                P.put(this, 0, "weather_text", text)
-                P.put(this, 0, "weather_transp", isTransp)
-                P.put(this, 0, "city", etCityName.text.toString().trim())
-            }
-            "link" -> {
-                P.put(this, 0, "link_bg", bg)
-                P.put(this, 0, "link_text", text)
-                P.put(this, 0, "link_transp", isTransp)
-                P.put(this, 0, "link_url", etLinkUrl.text.toString().trim())
-                P.put(this, 0, "link_top", etLinkTop.text.toString().trim())
-                P.put(this, 0, "link_label", etLinkLabel.text.toString().trim())
-            }
-            "calendar" -> {
-                val accent = etCalAccent.text.toString().trim()
-                P.put(this, 0, "cal_bg", bg)
-                P.put(this, 0, "cal_text", text)
-                P.put(this, 0, "cal_transp", isTransp)
-                P.put(this, 0, "cal_head", accent)
-                P.put(this, 0, "cal_circle", accent)
-            }
-        }
-    }
-
-    private fun updateLivePreview() {
-        val isTransp = switchTransparent.isChecked
-        val bgColor = col(etBgColor.text.toString(), Color.parseColor("#1E293B"))
-        val textColor = col(etTextColor.text.toString(), Color.WHITE)
-
-        if (isTransp) {
-            previewContainerCard.setCardBackgroundColor(Color.parseColor("#20FFFFFF"))
-            previewContainerCard.strokeColor = Color.parseColor("#40FFFFFF")
-        } else {
-            previewContainerCard.setCardBackgroundColor(bgColor)
-            previewContainerCard.strokeColor = Color.parseColor("#334155")
-        }
-
-        when (currentTab) {
-            "clock" -> {
-                val showDate = switchShowDate.isChecked
-                val isTop = rbDateTop.isChecked
-                previewClockDateTop.visibility = if (showDate && isTop) View.VISIBLE else View.GONE
-                previewClockDateBottom.visibility = if (showDate && !isTop) View.VISIBLE else View.GONE
-                previewClockTime.text = if (switch24Hour.isChecked) "21:45" else "9:45 PM"
-                previewClockTime.setTextColor(textColor)
-                previewClockDateTop.setTextColor(textColor)
-                previewClockDateBottom.setTextColor(textColor)
-            }
-            "weather" -> {
-                previewWeatherCity.text = etCityName.text.toString().ifEmpty { "İSTANBUL" }.uppercase()
-                previewWeatherCity.setTextColor(textColor)
-                previewWeatherTemp.setTextColor(textColor)
-                previewWeatherDesc.setTextColor(textColor)
-            }
-            "link" -> {
-                previewLinkTop.text = etLinkTop.text.toString().ifEmpty { "TIKLA" }
-                previewLinkLabel.text = etLinkLabel.text.toString().ifEmpty { "Web'i Aç" }
-                previewLinkTop.setTextColor(textColor)
-                previewLinkLabel.setTextColor(textColor)
-            }
-            "calendar" -> {
-                saveCurrentTabSettings()
-                val bmp = U.generateCalendarBitmap(this, 0)
-                previewCalendar.setImageBitmap(bmp)
-            }
-        }
-    }
-
-    private fun refreshWeatherAsync() {
         Thread {
             U.fetchWeather(this)
             runOnUiThread {
-                previewWeatherTemp.text = P.s(this, 0, "w_temp", "⛅ 21°C")
-                previewWeatherDesc.text = P.s(this, 0, "w_desc", "Açık")
-                previewWeatherCity.text = P.s(this, 0, "city", "İSTANBUL").uppercase()
-                Toast.makeText(this, "Hava durumu başarıyla güncellendi!", Toast.LENGTH_SHORT).show()
-                U.updateAll(this)
+                Toast.makeText(this, "$name hava durumu güncellendi!", Toast.LENGTH_SHORT).show()
+                updateLivePreview()
             }
         }.start()
     }
 
-    private fun showPinWidgetDialog() {
+    private fun setupActionButtons() {
+        btnSaveAndApply.setOnClickListener {
+            saveAllSettings()
+            U.updateAll(this)
+            Toast.makeText(this, "Tüm widget ayarları kaydedildi ve ekrandakiler anında güncellendi!", Toast.LENGTH_LONG).show()
+        }
+
+        btnPinWidget.setOnClickListener {
+            showPinDialog()
+        }
+    }
+
+    private fun saveAllSettings() {
+        P.put(this, 0, "clock_showDate", switchShowDate.isChecked)
+        P.put(this, 0, "clock_h24", switch24Hour.isChecked)
+        P.put(this, 0, "link_url", etLinkUrl.text.toString().trim())
+        P.put(this, 0, "link_top", etLinkTop.text.toString().trim())
+    }
+
+    private fun updateLivePreview() {
+        saveAllSettings()
+
+        val bmp = when (activeWidget) {
+            "ios_calendar" -> U.generateIosCalendarBitmap(this, 0, 2, 2)
+            "ios_weather" -> U.generateIosWeatherBitmap(this, 0, 2, 2)
+            "ios_battery" -> U.generateIosBatteryBitmap(this, 0, 2, 2)
+            "ios_clock" -> U.generateIosClockBitmap(this, 0, 2, 2)
+            "ios_notes" -> U.generateIosNotesBitmap(this, 0, 2, 2)
+            "date" -> U.generateIosCalendarBitmap(this, 0, 2, 2)
+            "clock" -> U.generateIosClockBitmap(this, 0, 2, 2)
+            "weather" -> U.generateIosWeatherBitmap(this, 0, 2, 2)
+            "link" -> {
+                // Link için şık buton önizlemesi
+                val w = 520; val h = 260
+                val b = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+                val cv = android.graphics.Canvas(b)
+                val p = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+                val op = P.i(this, 0, "link_opacity", 100)
+                val bgCol = col(P.s(this, 0, "link_bg", "#4F46E5"), Color.parseColor("#4F46E5"))
+                val textCol = col(P.s(this, 0, "link_text", "#FFFFFF"), Color.WHITE)
+                if (op > 0) {
+                    p.color = applyOpacity(bgCol, op)
+                    cv.drawRoundRect(android.graphics.RectF(0f, 0f, w.toFloat(), h.toFloat()), 46f, 46f, p)
+                }
+                p.color = textCol
+                p.textAlign = android.graphics.Paint.Align.CENTER
+                p.textSize = 62f
+                p.isFakeBoldText = true
+                cv.drawText(etLinkTop.text.toString().ifEmpty { "TIKLA" }, w / 2f, 130f, p)
+                p.textSize = 24f
+                p.isFakeBoldText = false
+                p.color = Color.argb(200, Color.red(textCol), Color.green(textCol), Color.blue(textCol))
+                cv.drawText(etLinkUrl.text.toString().ifEmpty { "https://www.google.com" }, w / 2f, 190f, p)
+                b
+            }
+            else -> U.generateIosCalendarBitmap(this, 0, 2, 2)
+        }
+
+        ivLivePreview.setImageBitmap(bmp)
+    }
+
+    // Gelişmiş İnteraktif Renk Seçici Diyaloğu
+    private fun showColorPickerDialog(title: String, initialHex: String, onColorSelected: (String) -> Unit) {
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_color_picker)
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        val tvTitle = dialog.findViewById<TextView>(R.id.dialogColorTitle)
+        val viewPreview = dialog.findViewById<View>(R.id.viewColorPreview)
+        val tvHex = dialog.findViewById<TextView>(R.id.tvHexPreview)
+        val presetContainer = dialog.findViewById<LinearLayout>(R.id.presetColorsContainer)
+        val sbR = dialog.findViewById<SeekBar>(R.id.sbRed)
+        val sbG = dialog.findViewById<SeekBar>(R.id.sbGreen)
+        val sbB = dialog.findViewById<SeekBar>(R.id.sbBlue)
+        val tvR = dialog.findViewById<TextView>(R.id.tvLabelR)
+        val tvG = dialog.findViewById<TextView>(R.id.tvLabelG)
+        val tvB = dialog.findViewById<TextView>(R.id.tvLabelB)
+        val etHex = dialog.findViewById<TextInputEditText>(R.id.etDialogHex)
+        val btnCancel = dialog.findViewById<MaterialButton>(R.id.btnCancelColor)
+        val btnApply = dialog.findViewById<MaterialButton>(R.id.btnApplyColor)
+
+        tvTitle.text = title
+
+        var currentColor = col(initialHex, Color.parseColor("#EF4444"))
+        fun updateDialogViews(color: Int, fromText: Boolean = false) {
+            currentColor = color
+            viewPreview.setBackgroundColor(color)
+            val hexStr = String.format("#%06X", (0xFFFFFF and color))
+            tvHex.text = hexStr
+            if (!fromText) {
+                etHex.setText(hexStr)
+            }
+            val r = Color.red(color)
+            val g = Color.green(color)
+            val b = Color.blue(color)
+            sbR.progress = r
+            sbG.progress = g
+            sbB.progress = b
+            tvR.text = "Kırmızı (R): $r"
+            tvG.text = "Yeşil (G): $g"
+            tvB.text = "Mavi (B): $b"
+        }
+
+        updateDialogViews(currentColor)
+
+        // 24 Hazır Renk Çipi
+        val presetList = listOf(
+            "#FF3B30", "#FF9500", "#FFCC00", "#34C759", "#007AFF", "#5856D6",
+            "#AF52DE", "#FF2D55", "#A2845E", "#8E8E93", "#1C1C1E", "#FFFFFF",
+            "#EF4444", "#F59E0B", "#10B981", "#06B6D4", "#3B82F6", "#6366F1",
+            "#8B5CF6", "#EC4899", "#1E293B", "#0F172A", "#1E3A8A", "#064E3B"
+        )
+        for (hex in presetList) {
+            val chip = MaterialButton(this).apply {
+                layoutParams = LinearLayout.LayoutParams(100, 100).apply { setMargins(6, 6, 6, 6) }
+                cornerRadius = 50
+                setBackgroundColor(col(hex, Color.RED))
+                setOnClickListener { updateDialogViews(col(hex, Color.RED)) }
+            }
+            presetContainer.addView(chip)
+        }
+
+        val seekListener = object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    val r = sbR.progress
+                    val g = sbG.progress
+                    val b = sbB.progress
+                    updateDialogViews(Color.rgb(r, g, b))
+                }
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        }
+        sbR.setOnSeekBarChangeListener(seekListener)
+        sbG.setOnSeekBarChangeListener(seekListener)
+        sbB.setOnSeekBarChangeListener(seekListener)
+
+        etHex.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+                val str = s?.toString()?.trim() ?: ""
+                if (str.length >= 7) {
+                    try {
+                        val parsed = Color.parseColor(str)
+                        updateDialogViews(parsed, fromText = true)
+                    } catch (e: Exception) {}
+                }
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+
+        btnCancel.setOnClickListener { dialog.dismiss() }
+        btnApply.setOnClickListener {
+            val finalHex = String.format("#%06X", (0xFFFFFF and currentColor))
+            onColorSelected(finalHex)
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    private fun showPinDialog() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             Toast.makeText(this, "Ana ekrana uzun basıp Senle Widgets seçiniz.", Toast.LENGTH_LONG).show()
             return
@@ -404,42 +622,23 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        saveCurrentTabSettings()
+        saveAllSettings()
 
-        val sizes = when (currentTab) {
-            "calendar" -> arrayOf("2x2 (Kare)")
-            else -> arrayOf("2x1 (Yatay)", "2x2 (Kare)", "3x1 (Yatay)", "3x2 (Yatay)")
+        val providerClass = when (activeWidget) {
+            "ios_calendar" -> IosCalendarW22::class.java
+            "ios_weather" -> IosWeatherW22::class.java
+            "ios_battery" -> IosBatteryW22::class.java
+            "ios_clock" -> IosClockW22::class.java
+            "ios_notes" -> IosNotesW22::class.java
+            "clock" -> ClockW22::class.java
+            "weather" -> WeatherW22::class.java
+            "link" -> LinkW22::class.java
+            "date" -> DateW22::class.java
+            else -> IosCalendarW22::class.java
         }
 
-        AlertDialog.Builder(this)
-            .setTitle("Boyut Seç ve Ana Ekrana Ekle")
-            .setItems(sizes) { _, which ->
-                val cls = when (currentTab) {
-                    "clock" -> when (which) {
-                        0 -> ClockW21::class.java
-                        1 -> ClockW22::class.java
-                        2 -> ClockW31::class.java
-                        else -> ClockW32::class.java
-                    }
-                    "weather" -> when (which) {
-                        0 -> WeatherW21::class.java
-                        1 -> WeatherW22::class.java
-                        2 -> WeatherW31::class.java
-                        else -> WeatherW32::class.java
-                    }
-                    "link" -> when (which) {
-                        0 -> LinkW21::class.java
-                        1 -> LinkW22::class.java
-                        2 -> LinkW31::class.java
-                        else -> LinkW32::class.java
-                    }
-                    else -> DateW22::class.java
-                }
-
-                val provider = ComponentName(this, cls)
-                appWidgetManager.requestPinAppWidget(provider, null, null)
-            }
-            .setNegativeButton("İptal", null)
-            .show()
+        val provider = ComponentName(this, providerClass)
+        appWidgetManager.requestPinAppWidget(provider, null, null)
+        Toast.makeText(this, "Samsung One UI 8.5 ana ekranına eklendi!", Toast.LENGTH_SHORT).show()
     }
 }

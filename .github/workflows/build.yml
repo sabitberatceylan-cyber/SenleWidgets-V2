@@ -32,7 +32,7 @@ jobs:
       - name: Prepare APK for Release
         run: |
           mkdir -p release_apk
-          cp app/build/outputs/apk/debug/*.apk release_apk/SenleWidgets-v2.0.apk || true
+          cp app/build/outputs/apk/debug/*.apk release_apk/SenleWidgets-v2.1.apk || true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -45,18 +45,16 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v2.0.0
-          name: "Senle Widgets v2.0 (Official Release)"
+          tag_name: v2.1.0
+          name: "Senle Widgets v2.1 (One UI 8.5 & iOS Edition)"
           body: |
-            ## 📱 Senle Widgets v2.0 Android APK
+            ## 📱 Senle Widgets v2.1 (One UI 8.5 & Apple iOS Paketi)
             
-            Tam özellikli Android widget paketi:
-            - 🕒 **Saat Widget'ı**: 24s/12s, Tarih aç/kapa, Saatin üstünde/altında konumu, Şeffaf ve özel renkler.
-            - ⛅ **Hava Durumu**: Open-Meteo ile 0 kurulum / anında çalışma + Google API desteği, şehir/GPS seçimi.
-            - 🔗 **Web Butonu / Link**: Tıklayınca istenen siteyi açan özel "TIKLA" butonu.
-            - 📅 **iPhone Tarzı Klasik Takvim**: Ayın tüm günlerini gösteren şık 2x2 takvim kartı, Samsung/Sistem takvimini açar, tüm renkler özelleştirilebilir.
-            - 🎨 **Uygulama İçi Canlı Düzenleyici**: Canlı önizleme, hazır renk paletleri, şeffaflık, tek tıkla ana ekrana ekleme!
-            - 📐 **Yeniden Boyutlandırma**: 2x1, 2x2, 3x1, 3x2 ve eklendikten sonra serbest büyütüp küçültme desteği!
-          files: release_apk/SenleWidgets-v2.0.apk
+            - 🍎 **Apple iOS Widget Stüdyosu**: iOS Takvim, Apple Weather, Apple Batarya Halka, Apple Minimal Saat, Apple Notlar/Hatırlatıcı kartları.
+            - 💎 **Gerçek Şeffaflık & Opaklık Oranı**: %0 (Tamamen Görünmez/Şeffaf) ile %100 (Tam Opak) arası hassas ayar.
+            - 🎨 **Gelişmiş Renk Seçici**: RGB kaydırıcılar, 24 hazır palet çipi ve doğrudan HEX renk girişi.
+            - 📱 **Samsung One UI 8.5 Uyumu**: Samsung Takvim, Saat, Hava Durumu, Cihaz Bakımı ve Notlar entegrasyonu + One UI squircle köşe tasarımı.
+            - 📐 **Serbest Yeniden Boyutlandırma**: 2x1, 2x2, 3x1, 3x2 desteği.
+          files: release_apk/SenleWidgets-v2.1.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
