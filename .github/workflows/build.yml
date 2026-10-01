@@ -1,0 +1,62 @@
+name: Build SenleWidgets APK
+
+on:
+  push:
+    branches: [ "**" ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Build APK
+        run: gradle assembleDebug --stacktrace
+
+      - name: Prepare APK for Release
+        run: |
+          mkdir -p release_apk
+          cp app/build/outputs/apk/debug/*.apk release_apk/SenleWidgets-v2.0.apk || true
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SenleWidgets-APK
+          path: release_apk/*.apk
+
+      - name: Create or Update GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref == 'refs/heads/main'
+        continue-on-error: true
+        with:
+          tag_name: v2.0.0
+          name: "Senle Widgets v2.0 (Official Release)"
+          body: |
+            ## 📱 Senle Widgets v2.0 Android APK
+            
+            Tam özellikli Android widget paketi:
+            - 🕒 **Saat Widget'ı**: 24s/12s, Tarih aç/kapa, Saatin üstünde/altında konumu, Şeffaf ve özel renkler.
+            - ⛅ **Hava Durumu**: Open-Meteo ile 0 kurulum / anında çalışma + Google API desteği, şehir/GPS seçimi.
+            - 🔗 **Web Butonu / Link**: Tıklayınca istenen siteyi açan özel "TIKLA" butonu.
+            - 📅 **iPhone Tarzı Klasik Takvim**: Ayın tüm günlerini gösteren şık 2x2 takvim kartı, Samsung/Sistem takvimini açar, tüm renkler özelleştirilebilir.
+            - 🎨 **Uygulama İçi Canlı Düzenleyici**: Canlı önizleme, hazır renk paletleri, şeffaflık, tek tıkla ana ekrana ekleme!
+            - 📐 **Yeniden Boyutlandırma**: 2x1, 2x2, 3x1, 3x2 ve eklendikten sonra serbest büyütüp küçültme desteği!
+          files: release_apk/SenleWidgets-v2.0.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
