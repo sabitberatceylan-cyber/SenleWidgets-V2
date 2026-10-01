@@ -3,7 +3,7 @@ package com.senle.widgets
 import android.app.Dialog
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
-import android.graphics.Color
+import android.graphics.*
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
