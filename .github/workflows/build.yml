@@ -26,13 +26,14 @@ jobs:
         with:
           gradle-version: '8.7'
 
-      - name: Build APK
-        run: gradle assembleDebug --stacktrace
+      - name: Build Signed APK
+        run: gradle assembleRelease assembleDebug --stacktrace
 
       - name: Prepare APK for Release
         run: |
           mkdir -p release_apk
-          cp app/build/outputs/apk/debug/*.apk release_apk/SenleWidgets-v2.1.apk || true
+          cp app/build/outputs/apk/release/*.apk release_apk/SenleWidgets-v2.2.apk || true
+          cp app/build/outputs/apk/debug/*.apk release_apk/SenleWidgets-v2.2-debug.apk || true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -45,16 +46,16 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v2.1.0
-          name: "Senle Widgets v2.1 (One UI 8.5 & iOS Edition)"
+          tag_name: v2.2.0
+          name: "Senle Widgets v2.2 (Samsung One UI 8.5 & Drive Kurulum Uyumlu)"
           body: |
-            ## 📱 Senle Widgets v2.1 (One UI 8.5 & Apple iOS Paketi)
+            ## 📱 Senle Widgets v2.2 - Kalıcı Sertifikalı ve Drive Kurulum Uyumlu
             
-            - 🍎 **Apple iOS Widget Stüdyosu**: iOS Takvim, Apple Weather, Apple Batarya Halka, Apple Minimal Saat, Apple Notlar/Hatırlatıcı kartları.
-            - 💎 **Gerçek Şeffaflık & Opaklık Oranı**: %0 (Tamamen Görünmez/Şeffaf) ile %100 (Tam Opak) arası hassas ayar.
-            - 🎨 **Gelişmiş Renk Seçici**: RGB kaydırıcılar, 24 hazır palet çipi ve doğrudan HEX renk girişi.
-            - 📱 **Samsung One UI 8.5 Uyumu**: Samsung Takvim, Saat, Hava Durumu, Cihaz Bakımı ve Notlar entegrasyonu + One UI squircle köşe tasarımı.
-            - 📐 **Serbest Yeniden Boyutlandırma**: 2x1, 2x2, 3x1, 3x2 desteği.
-          files: release_apk/SenleWidgets-v2.1.apk
+            Bu sürüm **Kalıcı Release Keystore Sertifikası (v1 + v2 + v3)** ile imzalanmıştır. Google Drive ve Samsung One UI 8.5'te kurulum hatası ("Bir sorun oluştu / Paket ayrıştırılamadı") almamak için:
+            
+            1. **Önceki sürümü telefonunuzdan kaldırın** (farklı debug anahtarıyla yüklendiği için çakışmayı önlemek amacıyla).
+            2. Google Drive'da dosyanın yanındaki **3 noktaya (⋮)** basıp **"İndir"** (Download) deyin.
+            3. Samsung **"Dosyalarım" (My Files)** -> **"İndirilenler"** bölümünden `SenleWidgets-v2.2.apk` dosyasına dokunarak kurun!
+          files: release_apk/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
