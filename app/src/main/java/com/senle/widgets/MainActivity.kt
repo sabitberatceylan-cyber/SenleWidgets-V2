@@ -218,7 +218,7 @@ class MainActivity : AppCompatActivity() {
             P.put(this, 0, "music_padding", 12)
             P.put(this, 0, "music_scale", 100)
             U.updateAll(this)
-            updatePreview()
+            updateLivePreview()
             Toast.makeText(this, "Boyut: Standart (2x2)", Toast.LENGTH_SHORT).show()
         }
 
@@ -226,7 +226,7 @@ class MainActivity : AppCompatActivity() {
             P.put(this, 0, "music_padding", 6)
             P.put(this, 0, "music_scale", 125)
             U.updateAll(this)
-            updatePreview()
+            updateLivePreview()
             Toast.makeText(this, "Boyut: Büyük (+%25)", Toast.LENGTH_SHORT).show()
         }
 
@@ -234,7 +234,7 @@ class MainActivity : AppCompatActivity() {
             P.put(this, 0, "music_padding", 2)
             P.put(this, 0, "music_scale", 150)
             U.updateAll(this)
-            updatePreview()
+            updateLivePreview()
             Toast.makeText(this, "Boyut: Devasa (+Kenarsız)", Toast.LENGTH_SHORT).show()
         }
 
