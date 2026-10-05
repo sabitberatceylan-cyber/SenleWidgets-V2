@@ -134,6 +134,15 @@ class ConfigActivity : AppCompatActivity() {
                 addEditText("Yazı / Buton Rengi", "music_text", "#FFFFFF")
                 addEditText("Vurgu Rengi (Spotify Yeşili)", "music_accent", "#1DB954")
                 addOpacitySeeker("music_opacity", 90)
+
+                val swHide = SwitchMaterial(this).apply {
+                    text = "Müzik Çalmazken Kilitte Gizle"
+                    isChecked = P.b(this@ConfigActivity, appWidgetId, "music_hide_idle", false)
+                    setTextColor(Color.parseColor("#F8FAFC"))
+                    setPadding(0, 16, 0, 8)
+                }
+                container.addView(swHide)
+                saves.add { P.put(this@ConfigActivity, appWidgetId, "music_hide_idle", swHide.isChecked) }
             }
         }
 

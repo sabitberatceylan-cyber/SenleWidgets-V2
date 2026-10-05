@@ -12,6 +12,7 @@ import android.os.BatteryManager
 import android.provider.AlarmClock
 import android.provider.CalendarContract
 import android.provider.Settings
+import android.util.TypedValue
 import android.view.View
 import android.widget.RemoteViews
 import org.json.JSONObject
@@ -874,6 +875,16 @@ object U {
 
     private fun music41(c: Context, id: Int, cols: Int, rows: Int): RemoteViews {
         val rv = RemoteViews(c.packageName, R.layout.w_music_41)
+        val isPlaying = MediaHolder.isPlaying
+
+        val hideIdle = P.b(c, id, "music_hide_idle", P.b(c, 0, "music_hide_idle", false))
+        if (hideIdle && !isPlaying) {
+            rv.setViewVisibility(R.id.root, View.GONE)
+            return rv
+        } else {
+            rv.setViewVisibility(R.id.root, View.VISIBLE)
+        }
+
         val tc = col(P.s(c, id, "music_text", "#FFFFFF"), Color.WHITE)
         val opacity = P.i(c, id, "music_opacity", 90)
         val bgColor = col(P.s(c, id, "music_bg", "#121212"), Color.parseColor("#121212"))
@@ -897,7 +908,6 @@ object U {
             rv.setImageViewResource(R.id.album_art, R.drawable.ic_music_note)
         }
 
-        val isPlaying = MediaHolder.isPlaying
         val playIcon = if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play
         rv.setImageViewResource(R.id.btn_play_pause, playIcon)
 
@@ -925,21 +935,47 @@ object U {
         val nextPending = PendingIntent.getBroadcast(c, id * 10 + 3, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         rv.setOnClickPendingIntent(R.id.btn_next, nextPending)
 
-        val aodPending = getAodMusicLaunchIntent(c)
-        rv.setOnClickPendingIntent(R.id.root, aodPending)
-        rv.setOnClickPendingIntent(R.id.album_art, aodPending)
+        val spotifyPending = getSpotifyLaunchIntent(c)
+        rv.setOnClickPendingIntent(R.id.root, spotifyPending)
+        rv.setOnClickPendingIntent(R.id.album_art, spotifyPending)
 
         return rv
     }
 
     private fun music22(c: Context, id: Int, cols: Int, rows: Int): RemoteViews {
         val rv = RemoteViews(c.packageName, R.layout.w_music_22)
+        val isPlaying = MediaHolder.isPlaying
+
+        val hideIdle = P.b(c, id, "music_hide_idle", P.b(c, 0, "music_hide_idle", false))
+        if (hideIdle && !isPlaying) {
+            rv.setViewVisibility(R.id.music_content, View.GONE)
+            rv.setViewVisibility(R.id.music_bg, View.GONE)
+            return rv
+        } else {
+            rv.setViewVisibility(R.id.music_content, View.VISIBLE)
+            rv.setViewVisibility(R.id.music_bg, View.VISIBLE)
+        }
+
         val tc = col(P.s(c, id, "music_text", "#FFFFFF"), Color.WHITE)
         val opacity = P.i(c, id, "music_opacity", 90)
         val bgColor = col(P.s(c, id, "music_bg", "#121212"), Color.parseColor("#121212"))
         val accentColor = col(P.s(c, id, "music_accent", "#1DB954"), Color.parseColor("#1DB954"))
 
         rv.setImageViewBitmap(R.id.music_bg, bg(bgColor, cols, rows, opacity))
+
+        // Boyut ve Dolgu (Büyütme Ayarı)
+        val defaultPad = if (cols >= 3) 6 else 10
+        val paddingDp = P.i(c, id, "music_padding", P.i(c, 0, "music_padding", defaultPad))
+        val padPx = (paddingDp * c.resources.displayMetrics.density).toInt()
+        rv.setViewPadding(R.id.music_content, padPx, padPx, padPx, padPx)
+
+        val scale = P.i(c, id, "music_scale", P.i(c, 0, "music_scale", 100))
+        val baseTitleSize = if (cols >= 3) 18f else 15f
+        val baseArtistSize = if (cols >= 3) 14f else 12f
+        val titleSp = (baseTitleSize * scale / 100f).coerceIn(12f, 26f)
+        val artistSp = (baseArtistSize * scale / 100f).coerceIn(10f, 20f)
+        rv.setTextViewTextSize(R.id.song_title, TypedValue.COMPLEX_UNIT_SP, titleSp)
+        rv.setTextViewTextSize(R.id.artist_name, TypedValue.COMPLEX_UNIT_SP, artistSp)
 
         val title = P.s(c, 0, "music_title", MediaHolder.songTitle)
         val artist = P.s(c, 0, "music_artist", MediaHolder.artistName)
@@ -957,7 +993,6 @@ object U {
             rv.setImageViewResource(R.id.album_art, R.drawable.ic_music_note)
         }
 
-        val isPlaying = MediaHolder.isPlaying
         val playIcon = if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play
         rv.setImageViewResource(R.id.btn_play_pause, playIcon)
 
@@ -985,15 +1020,26 @@ object U {
         val nextPending = PendingIntent.getBroadcast(c, id * 10 + 3, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         rv.setOnClickPendingIntent(R.id.btn_next, nextPending)
 
-        val aodPending = getAodMusicLaunchIntent(c)
-        rv.setOnClickPendingIntent(R.id.root, aodPending)
-        rv.setOnClickPendingIntent(R.id.album_art, aodPending)
+        // 🎵 Spotify Tıklaması (Stabil haline geri getirildi)
+        val spotifyPending = getSpotifyLaunchIntent(c)
+        rv.setOnClickPendingIntent(R.id.root, spotifyPending)
+        rv.setOnClickPendingIntent(R.id.album_art, spotifyPending)
 
         return rv
     }
 
     private fun musicLock(c: Context, id: Int, cols: Int, rows: Int): RemoteViews {
         val rv = RemoteViews(c.packageName, R.layout.w_music_lockscreen)
+        val isPlaying = MediaHolder.isPlaying
+
+        val hideIdle = P.b(c, id, "music_hide_idle", P.b(c, 0, "music_hide_idle", false))
+        if (hideIdle && !isPlaying) {
+            rv.setViewVisibility(R.id.root, View.GONE)
+            return rv
+        } else {
+            rv.setViewVisibility(R.id.root, View.VISIBLE)
+        }
+
         val title = P.s(c, 0, "music_title", MediaHolder.songTitle)
         val artist = P.s(c, 0, "music_artist", MediaHolder.artistName)
 
@@ -1008,7 +1054,6 @@ object U {
             rv.setImageViewResource(R.id.album_art, R.drawable.ic_music_note)
         }
 
-        val isPlaying = MediaHolder.isPlaying
         rv.setImageViewResource(R.id.btn_play_pause, if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
 
         val playIntent = Intent(c, MediaActionReceiver::class.java).apply {
@@ -1017,9 +1062,9 @@ object U {
         val playPending = PendingIntent.getBroadcast(c, id * 10 + 2, playIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         rv.setOnClickPendingIntent(R.id.btn_play_pause, playPending)
 
-        val aodPending = getAodMusicLaunchIntent(c)
-        rv.setOnClickPendingIntent(R.id.root, aodPending)
-        rv.setOnClickPendingIntent(R.id.album_art, aodPending)
+        val spotifyPending = getSpotifyLaunchIntent(c)
+        rv.setOnClickPendingIntent(R.id.root, spotifyPending)
+        rv.setOnClickPendingIntent(R.id.album_art, spotifyPending)
 
         return rv
     }
@@ -1196,6 +1241,8 @@ object U {
             MusicW41::class.java to ("music_41" to (4 to 1)),
             MusicW31::class.java to ("music_41" to (3 to 1)),
             MusicW22::class.java to ("music_22" to (2 to 2)),
+            MusicW33::class.java to ("music_22" to (3 to 3)),
+            MusicW44::class.java to ("music_22" to (4 to 4)),
             MusicW42::class.java to ("music_22" to (4 to 2)),
             MusicLockW21::class.java to ("music_lock" to (2 to 1))
         )

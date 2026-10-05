@@ -32,8 +32,8 @@ jobs:
       - name: Prepare APK for Release
         run: |
           mkdir -p release_apk
-          cp app/build/outputs/apk/release/*.apk release_apk/SenleWidgets-v2.5.apk || true
-          cp app/build/outputs/apk/debug/*.apk release_apk/SenleWidgets-v2.5-debug.apk || true
+          cp app/build/outputs/apk/release/*.apk release_apk/SenleWidgets-v2.6.apk || true
+          cp app/build/outputs/apk/debug/*.apk release_apk/SenleWidgets-v2.6-debug.apk || true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -46,28 +46,27 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-            tag_name: v2.5.0
-            name: "Senle Widgets v2.5 (iPhone Tarzı Tam Ekran AMOLED AOD Müzik Çalar)"
+            tag_name: v2.6.0
+            name: "Senle Widgets v2.6 (2x2 Kilit Ekranı Boyutlandırma & Otomatik Gizlenme)"
             body: |
-              ## 🎵 Senle Widgets v2.5 - iPhone Tarzı Tam Ekran AMOLED AOD Müzik Çalar
+              ## 🎵 Senle Widgets v2.6 - 2x2 Kilit Ekranı Onarımı, Büyütme & Otomatik Gizlenme
 
-              Kullanıcı isteği üzerine, kilit ekranı ve Always On Display'deki küçük widget sınırları aşılarak iPhone tarzı devasa tam ekran müzik oynatıcı entegre edildi!
+              Bu güncelleme ile kullanıcımızın kilit ekranındaki 2x2 Spotify widget'ı eski kusursuz stabil haline geri getirildi ve istenen boyut & gizlenme özellikleri eklendi!
 
               ### ✨ Yenilikler:
-              - **🌙 iPhone Tarzı Tam Ekran AMOLED Always On Display (AOD):**
-                - Saf siyah (`#000000`) AMOLED arka plan (piksel kapatarak sıfıra yakın pil tüketimi).
-                - Devasa yüksek çözünürlüklü albüm kapağı (280x280dp yuvarlatılmış kart).
-                - Akıcı kayan yazı şarkı adı (Marquee) ve sanatçı detayı.
-                - Canlı şarkı süresi ve etkileşimli ilerleme çubuğu (Seek Bar).
-                - Büyük dokunmatik medya kontrol butonları: Önceki (⏮), Dev Oynat/Durdur (▶/⏸), Sonraki (⏭).
-              - **⚡ Akıllı Kilit Ekranı & AOD Entegrasyonu:**
-                - `showWhenLocked` ve `turnScreenOn` ile kilit açmaya gerek kalmadan doğrudan ekranda görünür.
-                - **Otomatik AOD Başlatma**: Müzik çalarken telefon kilitlendiğinde veya ekran kapandığında tam ekran müzik çalar otomatik olarak açılır.
-                - **AOD Karartma Modu**: Tek dokunuşla ultra düşük parlaklığa geçerek geceleri göz yormayan gerçek Always On Display deneyimi sunar, ekrana dokunulduğunda uyanır.
-              - **👆 Widget'tan Tek Dokunuşla Tam Ekrana Geçiş:**
-                - Ana ekran veya kilit ekranındaki herhangi bir müzik widget'ının albüm kapağına dokunulduğunda doğrudan tam ekran AOD moduna geçer.
+              - **🔒 2x2 Kilit Ekranı Widget'ı Eski Stabil Haline Döndürüldü:**
+                - Ekrana kilit vurulduğunda araya giren otomatik tam ekran geçişi kaldırıldı.
+                - Widget'a ve albüm kapağına dokunulduğunda doğrudan Spotify uygulamasının açılması sağlandı.
+                - Önceki, Oynat/Durdur ve Sonraki tuşları kilit ekranında anında yanıt verecek şekilde optimize edildi.
+              - **👻 Müzik Çalmazken Kilit Ekranında Otomatik Gizlenme:**
+                - Spotify durduğunda veya şarkı çalmazken widget kilit ekranında tamamen kaybolur (tertemiz duvar kağıdı görünümü).
+                - Spotify'da şarkı başladığı anda widget kilit ekranında canlı albüm kapağıyla otomatik belirir!
+              - **📐 2x2 Widget Büyütme & Ölçeklendirme:**
+                - Uygulama içinden `Normal`, `Büyük (+%25)` ve `Devasa (+Kenarsız)` boyut modları.
+                - Yeni `3x3` ve `4x4` büyük kare kart widget seçenekleri eklendi!
+                - Samsung kilit ekranı ve ana ekranda serbestçe büyütüp küçültebilme desteği (70dp - 600dp).
               - **🔐 Kalıcı Release Keystore Sertifikası (v1 + v2 + v3):**
-                - Google Drive ve paket ayrıştırma hatası olmaksızın sorunsuz kurulur.
+                - Google Drive veya dahili depolamadan sorunsuz tek tıkla kurulum.
             files: release_apk/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -155,7 +155,6 @@ object MediaHolder {
 class MediaListenerService : NotificationListenerService() {
 
     private var currentController: MediaController? = null
-    private var isScreenReceiverRegistered = false
 
     private val callback = object : MediaController.Callback() {
         override fun onMetadataChanged(metadata: MediaMetadata?) {
@@ -169,57 +168,8 @@ class MediaListenerService : NotificationListenerService() {
         }
     }
 
-    private val screenReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            if (intent?.action == Intent.ACTION_SCREEN_OFF) {
-                val ctx = context ?: applicationContext
-                val autoAod = P.b(ctx, 0, "aod_auto_launch", true)
-                if (autoAod && MediaHolder.isPlaying) {
-                    val aodIntent = Intent(ctx, AodMusicActivity::class.java).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    }
-                    ctx.startActivity(aodIntent)
-                }
-            }
-        }
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-        registerScreenStateReceiver()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        unregisterScreenStateReceiver()
-    }
-
-    private fun registerScreenStateReceiver() {
-        if (!isScreenReceiverRegistered) {
-            try {
-                val filter = IntentFilter(Intent.ACTION_SCREEN_OFF)
-                registerReceiver(screenReceiver, filter)
-                isScreenReceiverRegistered = true
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    private fun unregisterScreenStateReceiver() {
-        if (isScreenReceiverRegistered) {
-            try {
-                unregisterReceiver(screenReceiver)
-                isScreenReceiverRegistered = false
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
     override fun onListenerConnected() {
         super.onListenerConnected()
-        registerScreenStateReceiver()
         findAndAttachActiveMedia()
     }
 
@@ -269,6 +219,8 @@ class MediaListenerService : NotificationListenerService() {
 
 class MediaActionReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        val controller = MediaHolder.activeController
+
         when (intent.action) {
             "com.senle.widgets.ACTION_MEDIA_PREV" -> {
                 MediaHolder.skipToPrevious(context)
@@ -281,10 +233,10 @@ class MediaActionReceiver : BroadcastReceiver() {
             }
         }
 
-        // 300ms sonra güncelleme gönder
+        // 350ms sonra güncelleme gönder
         Handler(Looper.getMainLooper()).postDelayed({
-            MediaHolder.updateFromController(context, MediaHolder.activeController)
+            MediaHolder.updateFromController(context, controller)
             U.updateAll(context)
-        }, 300)
+        }, 350)
     }
 }

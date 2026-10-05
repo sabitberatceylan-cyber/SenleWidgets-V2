@@ -67,6 +67,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var etLinkUrl: TextInputEditText
     private lateinit var etLinkTop: TextInputEditText
 
+    private lateinit var panelMusicExtra: LinearLayout
+    private lateinit var switchMusicHideIdle: SwitchMaterial
+    private lateinit var btnMusicSizeNormal: MaterialButton
+    private lateinit var btnMusicSizeLarge: MaterialButton
+    private lateinit var btnMusicSizeHuge: MaterialButton
+
     // Main action buttons
     private lateinit var btnSaveAndApply: MaterialButton
     private lateinit var btnPinWidget: MaterialButton
@@ -153,7 +159,7 @@ class MainActivity : AppCompatActivity() {
         val switchAodAutoLaunch = findViewById<SwitchMaterial>(R.id.switchAodAutoLaunch)
         val btnLaunchAodMusic = findViewById<MaterialButton>(R.id.btnLaunchAodMusic)
 
-        switchAodAutoLaunch.isChecked = P.b(this, 0, "aod_auto_launch", true)
+        switchAodAutoLaunch.isChecked = P.b(this, 0, "aod_auto_launch", false)
         switchAodAutoLaunch.setOnCheckedChangeListener { _, isChecked ->
             P.put(this, 0, "aod_auto_launch", isChecked)
             Toast.makeText(
@@ -190,6 +196,47 @@ class MainActivity : AppCompatActivity() {
         switch24Hour = findViewById(R.id.switch24Hour)
         etLinkUrl = findViewById(R.id.etLinkUrl)
         etLinkTop = findViewById(R.id.etLinkTop)
+
+        panelMusicExtra = findViewById(R.id.panelMusicExtra)
+        switchMusicHideIdle = findViewById(R.id.switchMusicHideIdle)
+        btnMusicSizeNormal = findViewById(R.id.btnMusicSizeNormal)
+        btnMusicSizeLarge = findViewById(R.id.btnMusicSizeLarge)
+        btnMusicSizeHuge = findViewById(R.id.btnMusicSizeHuge)
+
+        switchMusicHideIdle.isChecked = P.b(this, 0, "music_hide_idle", false)
+        switchMusicHideIdle.setOnCheckedChangeListener { _, isChecked ->
+            P.put(this, 0, "music_hide_idle", isChecked)
+            U.updateAll(this)
+            Toast.makeText(
+                this,
+                if (isChecked) "Müzik durunca widget kilit ekranında gizlenecek" else "Widget kilit ekranında her zaman görünecek",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        btnMusicSizeNormal.setOnClickListener {
+            P.put(this, 0, "music_padding", 12)
+            P.put(this, 0, "music_scale", 100)
+            U.updateAll(this)
+            updatePreview()
+            Toast.makeText(this, "Boyut: Standart (2x2)", Toast.LENGTH_SHORT).show()
+        }
+
+        btnMusicSizeLarge.setOnClickListener {
+            P.put(this, 0, "music_padding", 6)
+            P.put(this, 0, "music_scale", 125)
+            U.updateAll(this)
+            updatePreview()
+            Toast.makeText(this, "Boyut: Büyük (+%25)", Toast.LENGTH_SHORT).show()
+        }
+
+        btnMusicSizeHuge.setOnClickListener {
+            P.put(this, 0, "music_padding", 2)
+            P.put(this, 0, "music_scale", 150)
+            U.updateAll(this)
+            updatePreview()
+            Toast.makeText(this, "Boyut: Devasa (+Kenarsız)", Toast.LENGTH_SHORT).show()
+        }
 
         btnSaveAndApply = findViewById(R.id.btnSaveAndApply)
         btnPinWidget = findViewById(R.id.btnPinWidget)
@@ -289,6 +336,7 @@ class MainActivity : AppCompatActivity() {
         panelCitySettings.visibility = if (activeWidget.contains("weather")) View.VISIBLE else View.GONE
         panelClockExtra.visibility = if (activeWidget == "clock") View.VISIBLE else View.GONE
         panelLinkExtra.visibility = if (activeWidget == "link") View.VISIBLE else View.GONE
+        panelMusicExtra.visibility = if (activeWidget.startsWith("music")) View.VISIBLE else View.GONE
 
         // Aktif widget için opacity yükle
         val currentOpacity = getOpacityForWidget(activeWidget)
@@ -724,6 +772,8 @@ class MainActivity : AppCompatActivity() {
                 "🎵 3x1 Banner (1x3 Yana Uzatılabilir)",
                 "🔒 2x1 Kilit Ekranı & AOD Kompakt Hap (One UI Uyumlu)",
                 "🎵 2x2 Kare Kart (AOD & Kilit Ekranı Uyumlu)",
+                "🎵 3x3 Büyük Kare Kart (Genişletilmiş Kilit & Ana Ekran)",
+                "🎵 4x4 Devasa Kare Kart (Tam Genişlik Kilit & Ana Ekran)",
                 "🎵 4x2 Büyük Kart (Geniş Albüm Oynatıcı)"
             )
             val classes = arrayOf(
@@ -731,6 +781,8 @@ class MainActivity : AppCompatActivity() {
                 MusicW31::class.java,
                 MusicLockW21::class.java,
                 MusicW22::class.java,
+                MusicW33::class.java,
+                MusicW44::class.java,
                 MusicW42::class.java
             )
             AlertDialog.Builder(this)

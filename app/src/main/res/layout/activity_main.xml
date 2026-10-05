@@ -340,7 +340,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="10dp"
-                        android:checked="true"
+                        android:checked="false"
                         android:text="Müzik Çalarken Kilitte / AOD'de Otomatik Aç"
                         android:textColor="#F8FAFC"
                         android:textSize="13sp" />
@@ -867,6 +867,86 @@
                                 android:textColor="#F8FAFC"
                                 android:text="TIKLA" />
                         </com.google.android.material.textfield.TextInputLayout>
+                    </LinearLayout>
+
+                    <!-- Spotify & Medya Çalar Ek Ayarları (Kilitte Gizlenme & Boyut) -->
+                    <LinearLayout
+                        android:id="@+id/panelMusicExtra"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="KİLİT EKRANI &amp; BOYUT AYARLARI"
+                            android:textColor="#38BDF8"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:layout_marginBottom="8dp" />
+
+                        <com.google.android.material.switchmaterial.SwitchMaterial
+                            android:id="@+id/switchMusicHideIdle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Müzik Çalmazken Kilitte Gizle (Otomatik Kaybolma)"
+                            android:checked="false"
+                            android:textColor="#F8FAFC"
+                            android:layout_marginBottom="10dp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="2x2 Widget Büyütme / Dolgu Oranı:"
+                            android:textColor="#94A3B8"
+                            android:textSize="12sp"
+                            android:layout_marginBottom="6dp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:layout_marginBottom="8dp">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnMusicSizeNormal"
+                                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                                android:layout_width="0dp"
+                                android:layout_height="40dp"
+                                android:layout_weight="1"
+                                android:text="Normal"
+                                android:textSize="11sp"
+                                android:textAllCaps="false"
+                                android:textColor="#F8FAFC"
+                                app:cornerRadius="8dp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnMusicSizeLarge"
+                                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                                android:layout_width="0dp"
+                                android:layout_height="40dp"
+                                android:layout_weight="1"
+                                android:layout_marginStart="4dp"
+                                android:text="Büyük"
+                                android:textSize="11sp"
+                                android:textAllCaps="false"
+                                android:textColor="#F8FAFC"
+                                app:cornerRadius="8dp" />
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnMusicSizeHuge"
+                                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                                android:layout_width="0dp"
+                                android:layout_height="40dp"
+                                android:layout_weight="1.2"
+                                android:layout_marginStart="4dp"
+                                android:text="Dev (+Kenarsız)"
+                                android:textSize="11sp"
+                                android:textAllCaps="false"
+                                android:textColor="#F8FAFC"
+                                app:cornerRadius="8dp" />
+                        </LinearLayout>
                     </LinearLayout>
 
                 </LinearLayout>

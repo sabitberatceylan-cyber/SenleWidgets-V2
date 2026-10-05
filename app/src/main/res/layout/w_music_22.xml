@@ -11,11 +11,12 @@
         android:scaleType="fitXY" />
 
     <LinearLayout
+        android:id="@+id/music_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="12dp">
+        android:padding="10dp">
 
         <ImageView
             android:id="@+id/album_art"

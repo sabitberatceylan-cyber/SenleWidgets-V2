@@ -192,6 +192,14 @@
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_music_22" />
         </receiver>
+        <receiver android:name=".MusicW33" android:exported="true" android:label="🎵 Spotify Büyük Kare Kart 3x3">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_music_33" />
+        </receiver>
+        <receiver android:name=".MusicW44" android:exported="true" android:label="🎵 Spotify Devasa Kare Kart 4x4">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_music_44" />
+        </receiver>
         <receiver android:name=".MusicW42" android:exported="true" android:label="🎵 Spotify Büyük Kart 4x2">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_music_42" />
