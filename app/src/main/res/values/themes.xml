@@ -8,4 +8,12 @@
         <item name="android:navigationBarColor">@color/background_dark</item>
         <item name="android:windowBackground">@color/background_dark</item>
     </style>
+
+    <style name="Theme.SenleWidgets.FullScreenAod" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:windowBackground">#000000</item>
+        <item name="android:colorBackground">#000000</item>
+        <item name="android:statusBarColor">#000000</item>
+        <item name="android:navigationBarColor">#000000</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
 </resources>

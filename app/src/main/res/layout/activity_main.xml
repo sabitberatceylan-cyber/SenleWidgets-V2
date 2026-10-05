@@ -279,6 +279,86 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- iPhone Tarzı Tam Ekran AMOLED AOD Kartı -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardAodMusicStudio"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="14dp"
+                app:cardBackgroundColor="#0A0A0A"
+                app:cardCornerRadius="16dp"
+                app:strokeColor="#1DB954"
+                app:strokeWidth="1.5dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="🎵 iPhone Tarzı Tam Ekran AMOLED AOD"
+                            android:textColor="#1DB954"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="@drawable/bg_lockscreen_pill"
+                            android:paddingStart="8dp"
+                            android:paddingEnd="8dp"
+                            android:paddingTop="3dp"
+                            android:paddingBottom="3dp"
+                            android:text="YENİ"
+                            android:textColor="#FFFFFF"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:layout_marginBottom="12dp"
+                        android:text="Kilit ekranı ve Always On Display'de (AOD) küçük widget yerine iPhone'daki gibi tam ekran devasa albüm kapağı, saat, şarkı bilgisi ve kontroller ile saf siyah (#000000) AMOLED tasarımı."
+                        android:textColor="#94A3B8"
+                        android:textSize="12sp"
+                        android:lineSpacingExtra="2dp" />
+
+                    <com.google.android.material.switchmaterial.SwitchMaterial
+                        android:id="@+id/switchAodAutoLaunch"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:checked="true"
+                        android:text="Müzik Çalarken Kilitte / AOD'de Otomatik Aç"
+                        android:textColor="#F8FAFC"
+                        android:textSize="13sp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnLaunchAodMusic"
+                        android:layout_width="match_parent"
+                        android:layout_height="46dp"
+                        android:text="🚀 Tam Ekran AOD Müzik Çaları Başlat (Önizle)"
+                        android:textAllCaps="false"
+                        android:textColor="#000000"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        app:backgroundTint="#1DB954"
+                        app:cornerRadius="12dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- Samsung One UI Kilit Ekranı & AOD Kılavuzu -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardAodLockGuide"

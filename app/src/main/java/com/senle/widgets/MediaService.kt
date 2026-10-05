@@ -4,14 +4,20 @@ import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Bitmap
+import android.media.AudioManager
 import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.MediaSessionManager
 import android.media.session.PlaybackState
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
+import android.view.KeyEvent
+import java.util.concurrent.CopyOnWriteArrayList
 
 object MediaHolder {
     var activeController: MediaController? = null
@@ -19,11 +25,97 @@ object MediaHolder {
     var artistName: String = "Çalan müzik yok • Dokun"
     var albumArt: Bitmap? = null
     var isPlaying: Boolean = false
+    var durationMs: Long = 0L
+    var positionMs: Long = 0L
+    var playbackSpeed: Float = 1.0f
+    var lastPositionUpdateTime: Long = 0L
+
+    private val listeners = CopyOnWriteArrayList<() -> Unit>()
+
+    fun addListener(listener: () -> Unit) {
+        if (!listeners.contains(listener)) {
+            listeners.add(listener)
+        }
+    }
+
+    fun removeListener(listener: () -> Unit) {
+        listeners.remove(listener)
+    }
+
+    fun notifyListeners() {
+        Handler(Looper.getMainLooper()).post {
+            for (listener in listeners) {
+                try {
+                    listener.invoke()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+
+    fun getCurrentPosition(): Long {
+        if (!isPlaying || playbackSpeed <= 0f) return positionMs
+        val elapsed = System.currentTimeMillis() - lastPositionUpdateTime
+        val estimated = positionMs + (elapsed * playbackSpeed).toLong()
+        return if (durationMs > 0) estimated.coerceAtMost(durationMs) else estimated
+    }
+
+    fun skipToPrevious(c: Context) {
+        val controller = activeController
+        if (controller != null) {
+            controller.transportControls?.skipToPrevious()
+        } else {
+            dispatchKeyEvent(c, KeyEvent.KEYCODE_MEDIA_PREVIOUS)
+        }
+    }
+
+    fun togglePlayPause(c: Context) {
+        val controller = activeController
+        if (controller != null) {
+            if (isPlaying) {
+                controller.transportControls?.pause()
+            } else {
+                controller.transportControls?.play()
+            }
+        } else {
+            dispatchKeyEvent(c, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
+        }
+    }
+
+    fun skipToNext(c: Context) {
+        val controller = activeController
+        if (controller != null) {
+            controller.transportControls?.skipToNext()
+        } else {
+            dispatchKeyEvent(c, KeyEvent.KEYCODE_MEDIA_NEXT)
+        }
+    }
+
+    fun seekTo(posMs: Long) {
+        activeController?.transportControls?.seekTo(posMs)
+        positionMs = posMs
+        lastPositionUpdateTime = System.currentTimeMillis()
+        notifyListeners()
+    }
+
+    private fun dispatchKeyEvent(c: Context, keyCode: Int) {
+        try {
+            val audioManager = c.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+            audioManager?.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_DOWN, keyCode))
+            audioManager?.dispatchMediaKeyEvent(KeyEvent(KeyEvent.ACTION_UP, keyCode))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
 
     fun updateFromController(c: Context, controller: MediaController?) {
         activeController = controller
         if (controller == null) {
             isPlaying = false
+            durationMs = 0L
+            positionMs = 0L
+            notifyListeners()
             return
         }
 
@@ -46,17 +138,25 @@ object MediaHolder {
         }
 
         isPlaying = pbState?.state == PlaybackState.STATE_PLAYING
+        durationMs = metadata?.getLong(MediaMetadata.METADATA_KEY_DURATION) ?: 0L
+        positionMs = pbState?.position ?: 0L
+        playbackSpeed = pbState?.playbackSpeed ?: 1.0f
+        lastPositionUpdateTime = pbState?.lastPositionUpdateTime ?: System.currentTimeMillis()
 
         // Tercihlere de kaydet
         P.put(c, 0, "music_title", songTitle)
         P.put(c, 0, "music_artist", artistName)
         P.put(c, 0, "music_is_playing", isPlaying)
+
+        notifyListeners()
     }
 }
 
 class MediaListenerService : NotificationListenerService() {
 
     private var currentController: MediaController? = null
+    private var isScreenReceiverRegistered = false
+
     private val callback = object : MediaController.Callback() {
         override fun onMetadataChanged(metadata: MediaMetadata?) {
             MediaHolder.updateFromController(applicationContext, currentController)
@@ -69,8 +169,57 @@ class MediaListenerService : NotificationListenerService() {
         }
     }
 
+    private val screenReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action == Intent.ACTION_SCREEN_OFF) {
+                val ctx = context ?: applicationContext
+                val autoAod = P.b(ctx, 0, "aod_auto_launch", true)
+                if (autoAod && MediaHolder.isPlaying) {
+                    val aodIntent = Intent(ctx, AodMusicActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    }
+                    ctx.startActivity(aodIntent)
+                }
+            }
+        }
+    }
+
+    override fun onCreate() {
+        super.onCreate()
+        registerScreenStateReceiver()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        unregisterScreenStateReceiver()
+    }
+
+    private fun registerScreenStateReceiver() {
+        if (!isScreenReceiverRegistered) {
+            try {
+                val filter = IntentFilter(Intent.ACTION_SCREEN_OFF)
+                registerReceiver(screenReceiver, filter)
+                isScreenReceiverRegistered = true
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun unregisterScreenStateReceiver() {
+        if (isScreenReceiverRegistered) {
+            try {
+                unregisterReceiver(screenReceiver)
+                isScreenReceiverRegistered = false
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
     override fun onListenerConnected() {
         super.onListenerConnected()
+        registerScreenStateReceiver()
         findAndAttachActiveMedia()
     }
 
@@ -120,50 +269,22 @@ class MediaListenerService : NotificationListenerService() {
 
 class MediaActionReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val controller = MediaHolder.activeController
-
         when (intent.action) {
             "com.senle.widgets.ACTION_MEDIA_PREV" -> {
-                if (controller != null) {
-                    controller.transportControls?.skipToPrevious()
-                } else {
-                    dispatchKeyEvent(context, android.view.KeyEvent.KEYCODE_MEDIA_PREVIOUS)
-                }
+                MediaHolder.skipToPrevious(context)
             }
             "com.senle.widgets.ACTION_MEDIA_PLAY_PAUSE" -> {
-                if (controller != null) {
-                    if (MediaHolder.isPlaying) {
-                        controller.transportControls?.pause()
-                    } else {
-                        controller.transportControls?.play()
-                    }
-                } else {
-                    dispatchKeyEvent(context, android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
-                }
+                MediaHolder.togglePlayPause(context)
             }
             "com.senle.widgets.ACTION_MEDIA_NEXT" -> {
-                if (controller != null) {
-                    controller.transportControls?.skipToNext()
-                } else {
-                    dispatchKeyEvent(context, android.view.KeyEvent.KEYCODE_MEDIA_NEXT)
-                }
+                MediaHolder.skipToNext(context)
             }
         }
 
-        // 350ms sonra güncelleme gönder
-        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-            MediaHolder.updateFromController(context, controller)
+        // 300ms sonra güncelleme gönder
+        Handler(Looper.getMainLooper()).postDelayed({
+            MediaHolder.updateFromController(context, MediaHolder.activeController)
             U.updateAll(context)
-        }, 350)
-    }
-
-    private fun dispatchKeyEvent(c: Context, keyCode: Int) {
-        try {
-            val audioManager = c.getSystemService(Context.AUDIO_SERVICE) as? android.media.AudioManager
-            audioManager?.dispatchMediaKeyEvent(android.view.KeyEvent(android.view.KeyEvent.ACTION_DOWN, keyCode))
-            audioManager?.dispatchMediaKeyEvent(android.view.KeyEvent(android.view.KeyEvent.ACTION_UP, keyCode))
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
+        }, 300)
     }
 }

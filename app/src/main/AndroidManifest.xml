@@ -5,6 +5,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <queries>
         <!-- Spotify ve Samsung One UI 8.5 Uygulamaları -->
@@ -47,6 +48,16 @@
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
+
+        <!-- iPhone Tarzı Tam Ekran AMOLED AOD Müzik Çalar -->
+        <activity
+            android:name=".AodMusicActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:screenOrientation="portrait"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:theme="@style/Theme.SenleWidgets.FullScreenAod" />
 
         <!-- Spotify / Medya Dinleme Servisi -->
         <service

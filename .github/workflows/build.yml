@@ -32,39 +32,42 @@ jobs:
       - name: Prepare APK for Release
         run: |
           mkdir -p release_apk
-          cp app/build/outputs/apk/release/*.apk release_apk/SenleWidgets-v2.4.apk || true
-          cp app/build/outputs/apk/debug/*.apk release_apk/SenleWidgets-v2.4-debug.apk || true
+          cp app/build/outputs/apk/release/*.apk release_apk/SenleWidgets-v2.5.apk || true
+          cp app/build/outputs/apk/debug/*.apk release_apk/SenleWidgets-v2.5-debug.apk || true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SenleWidgets-APK
-          path: release_apk/*.apk
+            name: SenleWidgets-APK
+            path: release_apk/*.apk
 
       - name: Create or Update GitHub Release
         uses: softprops/action-gh-release@v2
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v2.4.0
-          name: "Senle Widgets v2.4 (Samsung One UI 8.5 AOD & Kilit Ekranı Paketi)"
-          body: |
-            ## 🔒 Senle Widgets v2.4 - Samsung One UI 8.5 Kilit Ekranı & AOD Paketi
+            tag_name: v2.5.0
+            name: "Senle Widgets v2.5 (iPhone Tarzı Tam Ekran AMOLED AOD Müzik Çalar)"
+            body: |
+              ## 🎵 Senle Widgets v2.5 - iPhone Tarzı Tam Ekran AMOLED AOD Müzik Çalar
 
-            Bu güncelleme ile Samsung One UI 8.5 Kilit Ekranı ve Always On Display (AOD) entegrasyonu tamamlandı!
+              Kullanıcı isteği üzerine, kilit ekranı ve Always On Display'deki küçük widget sınırları aşılarak iPhone tarzı devasa tam ekran müzik oynatıcı entegre edildi!
 
-            ### ✨ Yenilikler:
-            - **🔒 Özel 2x1 Kilit Ekranı & AOD Kompakt Müzik Hapı:**
-              - Samsung One UI kilit ekranı saat altı slotları için özel kompakt hap (pill) tasarımı (`MusicLockW21`).
-              - `android:initialKeyguardLayout` ve `keyguard|home_screen` desteği eklendi.
-            - **🎵 Spotify & Medya Çalar Widget'ları (1x3, 1x4, 2x2, 4x2):**
-              - 1x4 ve 1x3 formatında yana uzatılabilir banner'lar ve 2x2 kare albüm kartları.
-              - Canlı parça bilgisi, sanatçı ve albüm kapağı.
-              - Anlık kontroller: Önceki şarkı (⏮), Oynat/Durdur (▶/⏸), Sonraki şarkı (⏭).
-            - **📱 Samsung One UI Kilit Ekranı ve Good Lock / LockStar Rehberi:**
-              - Uygulama içine tek dokunuşla kilit ekranı ayarlarını açma ve LockStar ile doğrudan AOD'ye widget koyma kılavuzu eklendi.
-            - **🔐 Kalıcı Release Keystore Sertifikası (v1 + v2 + v3):**
-              - Google Drive ve cihaz hafızasından sorunsuz kurulum.
-          files: release_apk/*.apk
+              ### ✨ Yenilikler:
+              - **🌙 iPhone Tarzı Tam Ekran AMOLED Always On Display (AOD):**
+                - Saf siyah (`#000000`) AMOLED arka plan (piksel kapatarak sıfıra yakın pil tüketimi).
+                - Devasa yüksek çözünürlüklü albüm kapağı (280x280dp yuvarlatılmış kart).
+                - Akıcı kayan yazı şarkı adı (Marquee) ve sanatçı detayı.
+                - Canlı şarkı süresi ve etkileşimli ilerleme çubuğu (Seek Bar).
+                - Büyük dokunmatik medya kontrol butonları: Önceki (⏮), Dev Oynat/Durdur (▶/⏸), Sonraki (⏭).
+              - **⚡ Akıllı Kilit Ekranı & AOD Entegrasyonu:**
+                - `showWhenLocked` ve `turnScreenOn` ile kilit açmaya gerek kalmadan doğrudan ekranda görünür.
+                - **Otomatik AOD Başlatma**: Müzik çalarken telefon kilitlendiğinde veya ekran kapandığında tam ekran müzik çalar otomatik olarak açılır.
+                - **AOD Karartma Modu**: Tek dokunuşla ultra düşük parlaklığa geçerek geceleri göz yormayan gerçek Always On Display deneyimi sunar, ekrana dokunulduğunda uyanır.
+              - **👆 Widget'tan Tek Dokunuşla Tam Ekrana Geçiş:**
+                - Ana ekran veya kilit ekranındaki herhangi bir müzik widget'ının albüm kapağına dokunulduğunda doğrudan tam ekran AOD moduna geçer.
+              - **🔐 Kalıcı Release Keystore Sertifikası (v1 + v2 + v3):**
+                - Google Drive ve paket ayrıştırma hatası olmaksızın sorunsuz kurulur.
+            files: release_apk/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

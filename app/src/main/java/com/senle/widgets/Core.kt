@@ -854,6 +854,13 @@ object U {
         return PendingIntent.getActivity(c, 8888, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
+    private fun getAodMusicLaunchIntent(c: Context): PendingIntent {
+        val intent = Intent(c, AodMusicActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        }
+        return PendingIntent.getActivity(c, 8889, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+    }
+
     private fun getRoundedCornerBitmap(src: Bitmap, cornerRadius: Float): Bitmap {
         val out = Bitmap.createBitmap(src.width, src.height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(out)
@@ -918,9 +925,9 @@ object U {
         val nextPending = PendingIntent.getBroadcast(c, id * 10 + 3, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         rv.setOnClickPendingIntent(R.id.btn_next, nextPending)
 
-        val spotifyPending = getSpotifyLaunchIntent(c)
-        rv.setOnClickPendingIntent(R.id.root, spotifyPending)
-        rv.setOnClickPendingIntent(R.id.album_art, spotifyPending)
+        val aodPending = getAodMusicLaunchIntent(c)
+        rv.setOnClickPendingIntent(R.id.root, aodPending)
+        rv.setOnClickPendingIntent(R.id.album_art, aodPending)
 
         return rv
     }
@@ -978,9 +985,9 @@ object U {
         val nextPending = PendingIntent.getBroadcast(c, id * 10 + 3, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         rv.setOnClickPendingIntent(R.id.btn_next, nextPending)
 
-        val spotifyPending = getSpotifyLaunchIntent(c)
-        rv.setOnClickPendingIntent(R.id.root, spotifyPending)
-        rv.setOnClickPendingIntent(R.id.album_art, spotifyPending)
+        val aodPending = getAodMusicLaunchIntent(c)
+        rv.setOnClickPendingIntent(R.id.root, aodPending)
+        rv.setOnClickPendingIntent(R.id.album_art, aodPending)
 
         return rv
     }
@@ -1010,9 +1017,9 @@ object U {
         val playPending = PendingIntent.getBroadcast(c, id * 10 + 2, playIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         rv.setOnClickPendingIntent(R.id.btn_play_pause, playPending)
 
-        val spotifyPending = getSpotifyLaunchIntent(c)
-        rv.setOnClickPendingIntent(R.id.root, spotifyPending)
-        rv.setOnClickPendingIntent(R.id.album_art, spotifyPending)
+        val aodPending = getAodMusicLaunchIntent(c)
+        rv.setOnClickPendingIntent(R.id.root, aodPending)
+        rv.setOnClickPendingIntent(R.id.album_art, aodPending)
 
         return rv
     }

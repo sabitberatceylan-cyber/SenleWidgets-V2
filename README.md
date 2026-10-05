@@ -4,6 +4,20 @@ Samsung One UI 8.5 ve tüm modern Android sürümleri için özel olarak tasarla
 
 ## 🌟 Yeni Eklenen Özellikler
 
+### 🎵 0. iPhone Tarzı Tam Ekran AMOLED Always On Display (AOD) & Kilit Ekranı Müzik Çalar (v2.5)
+* 🌙 **Tam Ekran AMOLED Saf Siyah (`#000000`) Tasarım:**
+  - Standart widget'ların kilit ekranındaki boyut sınırlamalarından bağımsız, tüm ekranı kaplayan iPhone tarzı devasa müzik oynatıcı.
+  - Saf siyah arka plan sayesinde Samsung AMOLED ekranlarda pikseller tamamen kapanır, sıfıra yakın pil harcar.
+* 🖼️ **Devasa Yüksek Çözünürlüklü Albüm Kapağı:**
+  - 280x280dp yuvarlatılmış modern albüm kartı, akıcı kayan şarkı adı (Marquee) ve sanatçı detayı.
+* 🎛️ **Geniş Dokunmatik Kontroller & İlerleme Çubuğu:**
+  - Önceki (⏮), Dev Oynat/Durdur (▶/⏸), Sonraki (⏭) butonları.
+  - Canlı saniye bazlı şarkı ilerleme çubuğu (Seek Bar) ve süreler.
+* ⚡ **Akıllı AOD Otomasyonu:**
+  - Telefon kilitlendiğinde veya ekran kapandığında müzik çalıyorsa otomatik olarak AOD ekranında başlar.
+  - Gece göz yormayan **"AOD Karartma Modu"** ile ekranı açık tutar, dokunulduğunda uyanır.
+  - Ana ekrandaki veya kilit ekranındaki Spotify widget'larının albüm kapağına dokunulduğunda doğrudan tam ekran AOD moduna geçer.
+
 ### 🍎 1. Apple / iOS Widget Stüdyosu
 * 📅 **iOS Klasik Takvim (2x2):**
   - Ayın tüm günlerini (1-31) gösteren 7 sütunluk klasik iOS takvim kartı.

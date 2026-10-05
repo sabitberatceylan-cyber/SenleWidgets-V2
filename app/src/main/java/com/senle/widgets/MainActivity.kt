@@ -150,6 +150,26 @@ class MainActivity : AppCompatActivity() {
                 .show()
         }
 
+        val switchAodAutoLaunch = findViewById<SwitchMaterial>(R.id.switchAodAutoLaunch)
+        val btnLaunchAodMusic = findViewById<MaterialButton>(R.id.btnLaunchAodMusic)
+
+        switchAodAutoLaunch.isChecked = P.b(this, 0, "aod_auto_launch", true)
+        switchAodAutoLaunch.setOnCheckedChangeListener { _, isChecked ->
+            P.put(this, 0, "aod_auto_launch", isChecked)
+            Toast.makeText(
+                this,
+                if (isChecked) "Otomatik Tam Ekran AOD Müzik Çalar Etkin" else "Otomatik AOD Devre Dışı",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
+        btnLaunchAodMusic.setOnClickListener {
+            val intent = Intent(this, AodMusicActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            startActivity(intent)
+        }
+
         btnStdTabClock = findViewById(R.id.btnStdTabClock)
         btnStdTabWeather = findViewById(R.id.btnStdTabWeather)
         btnStdTabLink = findViewById(R.id.btnStdTabLink)
