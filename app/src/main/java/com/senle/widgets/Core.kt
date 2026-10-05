@@ -163,6 +163,7 @@ object U {
             "ios_notes" -> iosNotes(c, id, cols, rows)
             "music_41" -> music41(c, id, cols, rows)
             "music_22" -> music22(c, id, cols, rows)
+            "music_lock" -> musicLock(c, id, cols, rows)
             else -> date(c, id)
         }
         m.updateAppWidget(id, rv)
@@ -984,6 +985,38 @@ object U {
         return rv
     }
 
+    private fun musicLock(c: Context, id: Int, cols: Int, rows: Int): RemoteViews {
+        val rv = RemoteViews(c.packageName, R.layout.w_music_lockscreen)
+        val title = P.s(c, 0, "music_title", MediaHolder.songTitle)
+        val artist = P.s(c, 0, "music_artist", MediaHolder.artistName)
+
+        rv.setTextViewText(R.id.song_title, title)
+        rv.setTextViewText(R.id.artist_name, artist)
+
+        val art = MediaHolder.albumArt
+        if (art != null) {
+            val roundedArt = getRoundedCornerBitmap(art, art.width * 0.2f)
+            rv.setImageViewBitmap(R.id.album_art, roundedArt)
+        } else {
+            rv.setImageViewResource(R.id.album_art, R.drawable.ic_music_note)
+        }
+
+        val isPlaying = MediaHolder.isPlaying
+        rv.setImageViewResource(R.id.btn_play_pause, if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
+
+        val playIntent = Intent(c, MediaActionReceiver::class.java).apply {
+            action = "com.senle.widgets.ACTION_MEDIA_PLAY_PAUSE"
+        }
+        val playPending = PendingIntent.getBroadcast(c, id * 10 + 2, playIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        rv.setOnClickPendingIntent(R.id.btn_play_pause, playPending)
+
+        val spotifyPending = getSpotifyLaunchIntent(c)
+        rv.setOnClickPendingIntent(R.id.root, spotifyPending)
+        rv.setOnClickPendingIntent(R.id.album_art, spotifyPending)
+
+        return rv
+    }
+
     fun generateMusicBitmap(c: Context, id: Int, cols: Int, rows: Int): Bitmap {
         val w = cols * 260
         val h = rows * 260
@@ -1152,11 +1185,12 @@ object U {
             IosClockW21::class.java to ("ios_clock" to (2 to 1)),
             IosNotesW22::class.java to ("ios_notes" to (2 to 2)),
 
-            // 🎵 Spotify & Medya Çalar (Banner & Kare Kartlar)
+            // 🎵 Spotify & Medya Çalar (Banner, Kare Kartlar & Kilit/AOD)
             MusicW41::class.java to ("music_41" to (4 to 1)),
             MusicW31::class.java to ("music_41" to (3 to 1)),
             MusicW22::class.java to ("music_22" to (2 to 2)),
-            MusicW42::class.java to ("music_22" to (4 to 2))
+            MusicW42::class.java to ("music_22" to (4 to 2)),
+            MusicLockW21::class.java to ("music_lock" to (2 to 1))
         )
 
         for ((cls, info) in providers) {

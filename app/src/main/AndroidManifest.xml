@@ -185,6 +185,10 @@
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_music_42" />
         </receiver>
+        <receiver android:name=".MusicLockW21" android:exported="true" android:label="🔒 Spotify Kilit Ekranı &amp; AOD 2x1">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_music_lock" />
+        </receiver>
 
     </application>
 

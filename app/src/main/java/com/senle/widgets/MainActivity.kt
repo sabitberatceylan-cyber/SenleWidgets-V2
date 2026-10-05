@@ -125,6 +125,31 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        findViewById<MaterialButton>(R.id.btnOpenLockSettings).setOnClickListener {
+            try {
+                val intent = Intent(Settings.ACTION_SECURITY_SETTINGS)
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                startActivity(intent)
+            } catch (e: Exception) {
+                startActivity(Intent(Settings.ACTION_SETTINGS))
+            }
+        }
+
+        findViewById<MaterialButton>(R.id.btnLockstarGuide).setOnClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Samsung Good Lock & LockStar Rehberi")
+                .setMessage(
+                    "Samsung One UI'da Senle Widgets'ı Kilit Ekranına ve Always On Display'e (AOD) eklemenin resmi yöntemi:\n\n" +
+                    "1. Galaxy Store'u açın ve 'Good Lock' (veya Play Store'dan 'Fine Lock') uygulamasını yükleyin.\n" +
+                    "2. Good Lock içinde 'LockStar' modülünü kurun ve açın.\n" +
+                    "3. Kilit Ekranı veya Always On Display düzenleme modunu açıp ekrana dokunun.\n" +
+                    "4. '+' (Widget Ekle) butonuna basıp 'Senle Widgets' -> 'Spotify' veya 'Takvim' seçin!\n" +
+                    "5. İstediğiniz yere taşıyıp 'Kaydet' deyin. Artık kilit ekranınızda ve AOD'de görünecektir!"
+                )
+                .setPositiveButton("Tamam", null)
+                .show()
+        }
+
         btnStdTabClock = findViewById(R.id.btnStdTabClock)
         btnStdTabWeather = findViewById(R.id.btnStdTabWeather)
         btnStdTabLink = findViewById(R.id.btnStdTabLink)
@@ -677,12 +702,14 @@ class MainActivity : AppCompatActivity() {
             val sizes = arrayOf(
                 "🎵 4x1 Banner (1x4 Yana Uzatılabilir)",
                 "🎵 3x1 Banner (1x3 Yana Uzatılabilir)",
+                "🔒 2x1 Kilit Ekranı & AOD Kompakt Hap (One UI Uyumlu)",
                 "🎵 2x2 Kare Kart (AOD & Kilit Ekranı Uyumlu)",
                 "🎵 4x2 Büyük Kart (Geniş Albüm Oynatıcı)"
             )
             val classes = arrayOf(
                 MusicW41::class.java,
                 MusicW31::class.java,
+                MusicLockW21::class.java,
                 MusicW22::class.java,
                 MusicW42::class.java
             )

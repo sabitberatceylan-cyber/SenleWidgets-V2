@@ -279,6 +279,77 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Samsung One UI Kilit Ekranı & AOD Kılavuzu -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardAodLockGuide"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="14dp"
+                app:cardBackgroundColor="#0F172A"
+                app:cardCornerRadius="16dp"
+                app:strokeColor="#38BDF8"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🔒 Samsung One UI Kilit Ekranı &amp; AOD Kurulumu"
+                        android:textColor="#38BDF8"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="10dp"
+                        android:text="Samsung One UI'da Spotify çalarken Kilit Ekranı ve Always On Display'de (AOD) büyük albüm kapağı ve şarkı kontrollerini görmek için:\n\n1️⃣ Samsung Dahili AOD Müzik: Ayarlar &gt; Kilit Ekranı ve AOD &gt; Always On Display &gt; 'Müzik bilgilerini göster' açık olmalıdır.\n\n2️⃣ Doğrudan Kilit Ekranına Widget Koyma: Samsung Galaxy Store'daki resmi Good Lock &gt; LockStar modülü ile kilit ekranına veya AOD'ye 'Senle Widgets'ı serbestçe ekleyebilirsiniz."
+                        android:textColor="#94A3B8"
+                        android:textSize="12sp"
+                        android:lineSpacingExtra="2dp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnOpenLockSettings"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="4dp"
+                            android:text="⚙️ Kilit / AOD Ayarları"
+                            android:textAllCaps="false"
+                            android:textColor="#38BDF8"
+                            android:textSize="12sp"
+                            app:cornerRadius="12dp"
+                            app:strokeColor="#38BDF8" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnLockstarGuide"
+                            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="4dp"
+                            android:text="💡 LockStar Rehberi"
+                            android:textAllCaps="false"
+                            android:textColor="#A5B4FC"
+                            android:textSize="12sp"
+                            app:cornerRadius="12dp"
+                            app:strokeColor="#6366F1" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- CANLI ÖNİZLEME KARTI -->
             <TextView
                 android:layout_width="wrap_content"

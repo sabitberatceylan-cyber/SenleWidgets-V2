@@ -32,8 +32,8 @@ jobs:
       - name: Prepare APK for Release
         run: |
           mkdir -p release_apk
-          cp app/build/outputs/apk/release/*.apk release_apk/SenleWidgets-v2.3.apk || true
-          cp app/build/outputs/apk/debug/*.apk release_apk/SenleWidgets-v2.3-debug.apk || true
+          cp app/build/outputs/apk/release/*.apk release_apk/SenleWidgets-v2.4.apk || true
+          cp app/build/outputs/apk/debug/*.apk release_apk/SenleWidgets-v2.4-debug.apk || true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -46,23 +46,25 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v2.3.0
-          name: "Senle Widgets v2.3 (Spotify, Kilit Ekranı & AOD Müzik Paketi)"
+          tag_name: v2.4.0
+          name: "Senle Widgets v2.4 (Samsung One UI 8.5 AOD & Kilit Ekranı Paketi)"
           body: |
-            ## 🎵 Senle Widgets v2.3 - Spotify & AOD Müzik Paketi
+            ## 🔒 Senle Widgets v2.4 - Samsung One UI 8.5 Kilit Ekranı & AOD Paketi
 
-            Bu sürümle birlikte Samsung One UI 8.5 ve Apple iOS tarzı Spotify & Medya Oynatıcı widget'ları eklendi!
+            Bu güncelleme ile Samsung One UI 8.5 Kilit Ekranı ve Always On Display (AOD) entegrasyonu tamamlandı!
 
             ### ✨ Yenilikler:
-            - **🎵 Spotify & Medya Çalar Widget'ları:**
-              - **4x1 & 3x1 Yatay Banner:** 1x4 ve 1x3 formatında yana uzatılabilir kompakt müzik banner'ı.
-              - **2x2 & 4x2 Kartlar:** Kare albüm kapağı odaklı modern iOS tarzı kart tasarımı.
-              - **Canlı Şarkı Bilgileri:** Çalan parça adı, sanatçı ve yüksek kaliteli albüm kapağı.
-              - **Etkileşimli Kontroller:** Önceki şarkı (⏮), Oynat/Durdur (▶/⏸), Sonraki şarkı (⏭) ve doğrudan Spotify açma.
-            - **🔒 Kilit Ekranı & Always On Display (AOD) Uyumu:**
-              - `keyguard|home_screen` desteği ile Samsung One UI 8.5 kilit ekranı ve AOD widget menüsünde doğrudan kullanılabilir.
+            - **🔒 Özel 2x1 Kilit Ekranı & AOD Kompakt Müzik Hapı:**
+              - Samsung One UI kilit ekranı saat altı slotları için özel kompakt hap (pill) tasarımı (`MusicLockW21`).
+              - `android:initialKeyguardLayout` ve `keyguard|home_screen` desteği eklendi.
+            - **🎵 Spotify & Medya Çalar Widget'ları (1x3, 1x4, 2x2, 4x2):**
+              - 1x4 ve 1x3 formatında yana uzatılabilir banner'lar ve 2x2 kare albüm kartları.
+              - Canlı parça bilgisi, sanatçı ve albüm kapağı.
+              - Anlık kontroller: Önceki şarkı (⏮), Oynat/Durdur (▶/⏸), Sonraki şarkı (⏭).
+            - **📱 Samsung One UI Kilit Ekranı ve Good Lock / LockStar Rehberi:**
+              - Uygulama içine tek dokunuşla kilit ekranı ayarlarını açma ve LockStar ile doğrudan AOD'ye widget koyma kılavuzu eklendi.
             - **🔐 Kalıcı Release Keystore Sertifikası (v1 + v2 + v3):**
-              - Google Drive ve cihaz hafızasından sorunsuz kurulum ("Paket ayrıştırılamadı" hatası vermez).
+              - Google Drive ve cihaz hafızasından sorunsuz kurulum.
           files: release_apk/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
