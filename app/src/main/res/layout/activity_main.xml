@@ -139,7 +139,31 @@
                         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
                         android:text="📋 Notlar"
+                        android:textAllCaps="false"
+                        android:textColor="#F8FAFC"
+                        app:cornerRadius="20dp"
+                        app:strokeColor="#334155" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnIosTabMusic"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="8dp"
+                        android:text="🎵 Spotify 4x1 (Banner)"
+                        android:textAllCaps="false"
+                        android:textColor="#F8FAFC"
+                        app:cornerRadius="20dp"
+                        app:strokeColor="#334155" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnIosTabMusic22"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🎵 Spotify 2x2 (Kare)"
                         android:textAllCaps="false"
                         android:textColor="#F8FAFC"
                         app:cornerRadius="20dp"
@@ -207,6 +231,53 @@
                         app:strokeColor="#334155" />
                 </LinearLayout>
             </HorizontalScrollView>
+
+            <!-- Bildirim Dinleyici / Spotify İzin Uyarısı -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardMusicPermission"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="14dp"
+                android:visibility="gone"
+                app:cardBackgroundColor="#1E1B4B"
+                app:cardCornerRadius="16dp"
+                app:strokeColor="#6366F1"
+                app:strokeWidth="1.5dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="🔔 Spotify &amp; AOD Medya İzni Gerekli"
+                        android:textColor="#A5B4FC"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="10dp"
+                        android:text="Kilit ekranı, Always On Display ve widget'ta anlık çalan şarkı ve albüm kapağının anlık görünmesi için Bildirim Dinleyici iznini etkinleştirin."
+                        android:textColor="#C7D2FE"
+                        android:textSize="12sp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btnGrantMusicPermission"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:text="🔑 Bildirim Erişimini Etkinleştir"
+                        android:textAllCaps="false"
+                        android:textSize="13sp"
+                        app:backgroundTint="#6366F1"
+                        app:cornerRadius="12dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- CANLI ÖNİZLEME KARTI -->
             <TextView

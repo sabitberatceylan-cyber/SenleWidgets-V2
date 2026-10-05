@@ -161,6 +161,8 @@ object U {
             "ios_battery" -> iosBattery(c, id, cols, rows)
             "ios_clock" -> iosClock(c, id, cols, rows)
             "ios_notes" -> iosNotes(c, id, cols, rows)
+            "music_41" -> music41(c, id, cols, rows)
+            "music_22" -> music22(c, id, cols, rows)
             else -> date(c, id)
         }
         m.updateAppWidget(id, rv)
@@ -841,6 +843,288 @@ object U {
         return rv
     }
 
+    private fun getSpotifyLaunchIntent(c: Context): PendingIntent {
+        val pm = c.packageManager
+        val intent = pm.getLaunchIntentForPackage("com.spotify.music")
+            ?: Intent(Intent.ACTION_MAIN).apply {
+                addCategory(Intent.CATEGORY_APP_MUSIC)
+            }
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        return PendingIntent.getActivity(c, 8888, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+    }
+
+    private fun getRoundedCornerBitmap(src: Bitmap, cornerRadius: Float): Bitmap {
+        val out = Bitmap.createBitmap(src.width, src.height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(out)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        val rect = RectF(0f, 0f, src.width.toFloat(), src.height.toFloat())
+        canvas.drawRoundRect(rect, cornerRadius, cornerRadius, paint)
+        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
+        canvas.drawBitmap(src, 0f, 0f, paint)
+        return out
+    }
+
+    private fun music41(c: Context, id: Int, cols: Int, rows: Int): RemoteViews {
+        val rv = RemoteViews(c.packageName, R.layout.w_music_41)
+        val tc = col(P.s(c, id, "music_text", "#FFFFFF"), Color.WHITE)
+        val opacity = P.i(c, id, "music_opacity", 90)
+        val bgColor = col(P.s(c, id, "music_bg", "#121212"), Color.parseColor("#121212"))
+        val accentColor = col(P.s(c, id, "music_accent", "#1DB954"), Color.parseColor("#1DB954"))
+
+        rv.setImageViewBitmap(R.id.music_bg, bg(bgColor, cols, rows, opacity))
+
+        val title = P.s(c, 0, "music_title", MediaHolder.songTitle)
+        val artist = P.s(c, 0, "music_artist", MediaHolder.artistName)
+        rv.setTextViewText(R.id.song_title, title)
+        rv.setTextViewText(R.id.artist_name, artist)
+        rv.setTextColor(R.id.song_title, tc)
+        val subColor = Color.argb(190, Color.red(tc), Color.green(tc), Color.blue(tc))
+        rv.setTextColor(R.id.artist_name, subColor)
+
+        val art = MediaHolder.albumArt
+        if (art != null) {
+            val roundedArt = getRoundedCornerBitmap(art, art.width * 0.15f)
+            rv.setImageViewBitmap(R.id.album_art, roundedArt)
+        } else {
+            rv.setImageViewResource(R.id.album_art, R.drawable.ic_music_note)
+        }
+
+        val isPlaying = MediaHolder.isPlaying
+        val playIcon = if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play
+        rv.setImageViewResource(R.id.btn_play_pause, playIcon)
+
+        try {
+            rv.setInt(R.id.btn_prev, "setColorFilter", tc)
+            rv.setInt(R.id.btn_next, "setColorFilter", tc)
+            rv.setInt(R.id.btn_play_pause, "setColorFilter", accentColor)
+        } catch (e: Exception) {}
+
+        val prevIntent = Intent(c, MediaActionReceiver::class.java).apply {
+            action = "com.senle.widgets.ACTION_MEDIA_PREV"
+        }
+        val prevPending = PendingIntent.getBroadcast(c, id * 10 + 1, prevIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        rv.setOnClickPendingIntent(R.id.btn_prev, prevPending)
+
+        val playIntent = Intent(c, MediaActionReceiver::class.java).apply {
+            action = "com.senle.widgets.ACTION_MEDIA_PLAY_PAUSE"
+        }
+        val playPending = PendingIntent.getBroadcast(c, id * 10 + 2, playIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        rv.setOnClickPendingIntent(R.id.btn_play_pause, playPending)
+
+        val nextIntent = Intent(c, MediaActionReceiver::class.java).apply {
+            action = "com.senle.widgets.ACTION_MEDIA_NEXT"
+        }
+        val nextPending = PendingIntent.getBroadcast(c, id * 10 + 3, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        rv.setOnClickPendingIntent(R.id.btn_next, nextPending)
+
+        val spotifyPending = getSpotifyLaunchIntent(c)
+        rv.setOnClickPendingIntent(R.id.root, spotifyPending)
+        rv.setOnClickPendingIntent(R.id.album_art, spotifyPending)
+
+        return rv
+    }
+
+    private fun music22(c: Context, id: Int, cols: Int, rows: Int): RemoteViews {
+        val rv = RemoteViews(c.packageName, R.layout.w_music_22)
+        val tc = col(P.s(c, id, "music_text", "#FFFFFF"), Color.WHITE)
+        val opacity = P.i(c, id, "music_opacity", 90)
+        val bgColor = col(P.s(c, id, "music_bg", "#121212"), Color.parseColor("#121212"))
+        val accentColor = col(P.s(c, id, "music_accent", "#1DB954"), Color.parseColor("#1DB954"))
+
+        rv.setImageViewBitmap(R.id.music_bg, bg(bgColor, cols, rows, opacity))
+
+        val title = P.s(c, 0, "music_title", MediaHolder.songTitle)
+        val artist = P.s(c, 0, "music_artist", MediaHolder.artistName)
+        rv.setTextViewText(R.id.song_title, title)
+        rv.setTextViewText(R.id.artist_name, artist)
+        rv.setTextColor(R.id.song_title, tc)
+        val subColor = Color.argb(190, Color.red(tc), Color.green(tc), Color.blue(tc))
+        rv.setTextColor(R.id.artist_name, subColor)
+
+        val art = MediaHolder.albumArt
+        if (art != null) {
+            val roundedArt = getRoundedCornerBitmap(art, art.width * 0.15f)
+            rv.setImageViewBitmap(R.id.album_art, roundedArt)
+        } else {
+            rv.setImageViewResource(R.id.album_art, R.drawable.ic_music_note)
+        }
+
+        val isPlaying = MediaHolder.isPlaying
+        val playIcon = if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play
+        rv.setImageViewResource(R.id.btn_play_pause, playIcon)
+
+        try {
+            rv.setInt(R.id.btn_prev, "setColorFilter", tc)
+            rv.setInt(R.id.btn_next, "setColorFilter", tc)
+            rv.setInt(R.id.btn_play_pause, "setColorFilter", accentColor)
+        } catch (e: Exception) {}
+
+        val prevIntent = Intent(c, MediaActionReceiver::class.java).apply {
+            action = "com.senle.widgets.ACTION_MEDIA_PREV"
+        }
+        val prevPending = PendingIntent.getBroadcast(c, id * 10 + 1, prevIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        rv.setOnClickPendingIntent(R.id.btn_prev, prevPending)
+
+        val playIntent = Intent(c, MediaActionReceiver::class.java).apply {
+            action = "com.senle.widgets.ACTION_MEDIA_PLAY_PAUSE"
+        }
+        val playPending = PendingIntent.getBroadcast(c, id * 10 + 2, playIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        rv.setOnClickPendingIntent(R.id.btn_play_pause, playPending)
+
+        val nextIntent = Intent(c, MediaActionReceiver::class.java).apply {
+            action = "com.senle.widgets.ACTION_MEDIA_NEXT"
+        }
+        val nextPending = PendingIntent.getBroadcast(c, id * 10 + 3, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        rv.setOnClickPendingIntent(R.id.btn_next, nextPending)
+
+        val spotifyPending = getSpotifyLaunchIntent(c)
+        rv.setOnClickPendingIntent(R.id.root, spotifyPending)
+        rv.setOnClickPendingIntent(R.id.album_art, spotifyPending)
+
+        return rv
+    }
+
+    fun generateMusicBitmap(c: Context, id: Int, cols: Int, rows: Int): Bitmap {
+        val w = cols * 260
+        val h = rows * 260
+        val bmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+        val cv = Canvas(bmp)
+
+        val opacity = P.i(c, id, "music_opacity", 90)
+        val bgColor = col(P.s(c, id, "music_bg", "#121212"), Color.parseColor("#121212"))
+        val textColor = col(P.s(c, id, "music_text", "#FFFFFF"), Color.WHITE)
+        val accentColor = col(P.s(c, id, "music_accent", "#1DB954"), Color.parseColor("#1DB954"))
+
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        val cardRect = RectF(0f, 0f, w.toFloat(), h.toFloat())
+        val rad = minOf(w, h) * 0.18f
+
+        if (opacity > 0) {
+            paint.color = applyOpacity(bgColor, opacity)
+            paint.style = Paint.Style.FILL
+            cv.drawRoundRect(cardRect, rad, rad, paint)
+            if (opacity in 15..95) {
+                paint.style = Paint.Style.STROKE
+                paint.strokeWidth = 2.5f
+                paint.color = Color.argb((opacity * 40 / 100).coerceIn(10, 60), 255, 255, 255)
+                cv.drawRoundRect(cardRect, rad, rad, paint)
+                paint.style = Paint.Style.FILL
+            }
+        }
+
+        val title = P.s(c, 0, "music_title", MediaHolder.songTitle).ifEmpty { "Spotify'da Şarkı Başlat" }
+        val artist = P.s(c, 0, "music_artist", MediaHolder.artistName).ifEmpty { "Dokun ve Çalmaya Başla" }
+        val isPlaying = MediaHolder.isPlaying
+
+        if (cols >= 3 && rows == 1) {
+            val artSize = h * 0.68f
+            val artRect = RectF(28f, (h - artSize) / 2f, 28f + artSize, (h + artSize) / 2f)
+            val art = MediaHolder.albumArt
+            if (art != null) {
+                val roundArt = getRoundedCornerBitmap(art, art.width * 0.18f)
+                cv.drawBitmap(roundArt, null, artRect, paint)
+            } else {
+                paint.color = Color.parseColor("#282828")
+                cv.drawRoundRect(artRect, 18f, 18f, paint)
+                paint.color = accentColor
+                paint.textSize = artSize * 0.45f
+                paint.textAlign = Paint.Align.CENTER
+                cv.drawText("🎵", artRect.centerX(), artRect.centerY() + 16f, paint)
+            }
+
+            val textLeft = artRect.right + 26f
+            paint.textAlign = Paint.Align.LEFT
+            paint.color = textColor
+            paint.textSize = 28f
+            paint.isFakeBoldText = true
+            val titleTrimmed = if (title.length > 20) title.take(18) + "…" else title
+            cv.drawText(titleTrimmed, textLeft, h * 0.45f, paint)
+
+            paint.color = Color.argb(190, Color.red(textColor), Color.green(textColor), Color.blue(textColor))
+            paint.textSize = 22f
+            paint.isFakeBoldText = false
+            val artistTrimmed = if (artist.length > 24) artist.take(22) + "…" else artist
+            cv.drawText(artistTrimmed, textLeft, h * 0.72f, paint)
+
+            val btnY = h / 2f
+            val nextX = w - 60f
+            val playX = nextX - 70f
+            val prevX = playX - 70f
+
+            paint.textAlign = Paint.Align.CENTER
+            paint.textSize = 34f
+            paint.color = textColor
+            cv.drawText("⏮", prevX, btnY + 12f, paint)
+
+            val circlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = accentColor
+                style = Paint.Style.FILL
+            }
+            cv.drawCircle(playX, btnY, 32f, circlePaint)
+            paint.color = Color.WHITE
+            paint.textSize = 28f
+            cv.drawText(if (isPlaying) "⏸" else "▶", playX + 2f, btnY + 10f, paint)
+
+            paint.color = textColor
+            paint.textSize = 34f
+            cv.drawText("⏭", nextX, btnY + 12f, paint)
+        } else {
+            val artSize = minOf(w * 0.52f, h * 0.46f)
+            val artLeft = (w - artSize) / 2f
+            val artTop = 40f
+            val artRect = RectF(artLeft, artTop, artLeft + artSize, artTop + artSize)
+            val art = MediaHolder.albumArt
+            if (art != null) {
+                val roundArt = getRoundedCornerBitmap(art, art.width * 0.18f)
+                cv.drawBitmap(roundArt, null, artRect, paint)
+            } else {
+                paint.color = Color.parseColor("#282828")
+                cv.drawRoundRect(artRect, 24f, 24f, paint)
+                paint.color = accentColor
+                paint.textSize = artSize * 0.42f
+                paint.textAlign = Paint.Align.CENTER
+                cv.drawText("🎵", artRect.centerX(), artRect.centerY() + 20f, paint)
+            }
+
+            paint.textAlign = Paint.Align.CENTER
+            paint.color = textColor
+            paint.textSize = 28f
+            paint.isFakeBoldText = true
+            val titleTrimmed = if (title.length > 22) title.take(20) + "…" else title
+            cv.drawText(titleTrimmed, w / 2f, artRect.bottom + 42f, paint)
+
+            paint.color = Color.argb(190, Color.red(textColor), Color.green(textColor), Color.blue(textColor))
+            paint.textSize = 21f
+            paint.isFakeBoldText = false
+            val artistTrimmed = if (artist.length > 26) artist.take(24) + "…" else artist
+            cv.drawText(artistTrimmed, w / 2f, artRect.bottom + 76f, paint)
+
+            val btnY = h - 60f
+            val playX = w / 2f
+            val prevX = playX - 85f
+            val nextX = playX + 85f
+
+            paint.color = textColor
+            paint.textSize = 36f
+            cv.drawText("⏮", prevX, btnY + 12f, paint)
+
+            val circlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = accentColor
+                style = Paint.Style.FILL
+            }
+            cv.drawCircle(playX, btnY, 34f, circlePaint)
+            paint.color = Color.WHITE
+            paint.textSize = 30f
+            cv.drawText(if (isPlaying) "⏸" else "▶", playX + 2f, btnY + 11f, paint)
+
+            paint.color = textColor
+            paint.textSize = 36f
+            cv.drawText("⏭", nextX, btnY + 12f, paint)
+        }
+
+        return bmp
+    }
+
     fun updateAll(c: Context) {
         val m = AppWidgetManager.getInstance(c)
         val providers = listOf(
@@ -866,7 +1150,13 @@ object U {
             IosBatteryW21::class.java to ("ios_battery" to (2 to 1)),
             IosClockW22::class.java to ("ios_clock" to (2 to 2)),
             IosClockW21::class.java to ("ios_clock" to (2 to 1)),
-            IosNotesW22::class.java to ("ios_notes" to (2 to 2))
+            IosNotesW22::class.java to ("ios_notes" to (2 to 2)),
+
+            // 🎵 Spotify & Medya Çalar (Banner & Kare Kartlar)
+            MusicW41::class.java to ("music_41" to (4 to 1)),
+            MusicW31::class.java to ("music_41" to (3 to 1)),
+            MusicW22::class.java to ("music_22" to (2 to 2)),
+            MusicW42::class.java to ("music_22" to (4 to 2))
         )
 
         for ((cls, info) in providers) {

@@ -3,9 +3,11 @@ package com.senle.widgets
 import android.app.Dialog
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
+import android.content.Intent
 import android.graphics.*
 import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -19,7 +21,7 @@ import com.google.android.material.textfield.TextInputEditText
 class MainActivity : AppCompatActivity() {
 
     private var activeCategory = "ios" // "ios" or "standard"
-    private var activeWidget = "ios_calendar" // "ios_calendar", "ios_weather", "ios_battery", "ios_clock", "ios_notes", "clock", "weather", "link", "date"
+    private var activeWidget = "ios_calendar" // "ios_calendar", "ios_weather", "ios_battery", "ios_clock", "ios_notes", "music_41", "music_22", "clock", "weather", "link", "date"
 
     // Views
     private lateinit var btnCatIos: MaterialButton
@@ -33,6 +35,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnIosTabBattery: MaterialButton
     private lateinit var btnIosTabClock: MaterialButton
     private lateinit var btnIosTabNotes: MaterialButton
+    private lateinit var btnIosTabMusic: MaterialButton
+    private lateinit var btnIosTabMusic22: MaterialButton
+
+    // Permission views
+    private lateinit var cardMusicPermission: View
+    private lateinit var btnGrantMusicPermission: MaterialButton
 
     // Standard tab buttons
     private lateinit var btnStdTabClock: MaterialButton
@@ -78,6 +86,22 @@ class MainActivity : AppCompatActivity() {
         updateLivePreview()
     }
 
+    override fun onResume() {
+        super.onResume()
+        checkMusicPermission()
+        updateLivePreview()
+    }
+
+    private fun isNotificationServiceEnabled(): Boolean {
+        val flat = Settings.Secure.getString(contentResolver, "enabled_notification_listeners")
+        return flat != null && flat.contains(packageName)
+    }
+
+    private fun checkMusicPermission() {
+        val hasPermission = isNotificationServiceEnabled()
+        cardMusicPermission.visibility = if (!hasPermission) View.VISIBLE else View.GONE
+    }
+
     private fun initViews() {
         btnCatIos = findViewById(R.id.btnCatIos)
         btnCatStandard = findViewById(R.id.btnCatStandard)
@@ -89,6 +113,17 @@ class MainActivity : AppCompatActivity() {
         btnIosTabBattery = findViewById(R.id.btnIosTabBattery)
         btnIosTabClock = findViewById(R.id.btnIosTabClock)
         btnIosTabNotes = findViewById(R.id.btnIosTabNotes)
+        btnIosTabMusic = findViewById(R.id.btnIosTabMusic)
+        btnIosTabMusic22 = findViewById(R.id.btnIosTabMusic22)
+
+        cardMusicPermission = findViewById(R.id.cardMusicPermission)
+        btnGrantMusicPermission = findViewById(R.id.btnGrantMusicPermission)
+
+        btnGrantMusicPermission.setOnClickListener {
+            val intent = Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+        }
 
         btnStdTabClock = findViewById(R.id.btnStdTabClock)
         btnStdTabWeather = findViewById(R.id.btnStdTabWeather)
@@ -136,7 +171,9 @@ class MainActivity : AppCompatActivity() {
             btnIosTabWeather to "ios_weather",
             btnIosTabBattery to "ios_battery",
             btnIosTabClock to "ios_clock",
-            btnIosTabNotes to "ios_notes"
+            btnIosTabNotes to "ios_notes",
+            btnIosTabMusic to "music_41",
+            btnIosTabMusic22 to "music_22"
         )
         for ((btn, type) in iosTabs) {
             btn.setOnClickListener {
@@ -186,6 +223,8 @@ class MainActivity : AppCompatActivity() {
             btnIosTabBattery to "ios_battery",
             btnIosTabClock to "ios_clock",
             btnIosTabNotes to "ios_notes",
+            btnIosTabMusic to "music_41",
+            btnIosTabMusic22 to "music_22",
             btnStdTabClock to "clock",
             btnStdTabWeather to "weather",
             btnStdTabLink to "link",
@@ -219,12 +258,13 @@ class MainActivity : AppCompatActivity() {
             "ios_battery" -> "ios_bat_opacity"
             "ios_clock" -> "ios_clk_opacity"
             "ios_notes" -> "ios_notes_opacity"
+            "music_41", "music_22" -> "music_opacity"
             "clock" -> "clock_opacity"
             "weather" -> "weather_opacity"
             "link" -> "link_opacity"
             else -> "cal_opacity"
         }
-        return P.i(this, 0, key, 100)
+        return P.i(this, 0, key, if (type.startsWith("music")) 90 else 100)
     }
 
     private fun setOpacityForWidget(type: String, value: Int) {
@@ -234,6 +274,7 @@ class MainActivity : AppCompatActivity() {
             "ios_battery" -> "ios_bat_opacity"
             "ios_clock" -> "ios_clk_opacity"
             "ios_notes" -> "ios_notes_opacity"
+            "music_41", "music_22" -> "music_opacity"
             "clock" -> "clock_opacity"
             "weather" -> "weather_opacity"
             "link" -> "link_opacity"
@@ -249,6 +290,7 @@ class MainActivity : AppCompatActivity() {
             "ios_battery" -> P.s(this, 0, "ios_bat_bg", "#1C1C1E")
             "ios_clock" -> P.s(this, 0, "ios_clk_bg", "#18181B")
             "ios_notes" -> P.s(this, 0, "ios_notes_bg", "#1C1C1E")
+            "music_41", "music_22" -> P.s(this, 0, "music_bg", "#121212")
             "clock" -> P.s(this, 0, "clock_bg", "#1E1E2E")
             "weather" -> P.s(this, 0, "weather_bg", "#1565C0")
             "link" -> P.s(this, 0, "link_bg", "#4F46E5")
@@ -263,6 +305,7 @@ class MainActivity : AppCompatActivity() {
             "ios_battery" -> "ios_bat_bg"
             "ios_clock" -> "ios_clk_bg"
             "ios_notes" -> "ios_notes_bg"
+            "music_41", "music_22" -> "music_bg"
             "clock" -> "clock_bg"
             "weather" -> "weather_bg"
             "link" -> "link_bg"
@@ -278,6 +321,7 @@ class MainActivity : AppCompatActivity() {
             "ios_battery" -> P.s(this, 0, "ios_bat_text", "#FFFFFF")
             "ios_clock" -> P.s(this, 0, "ios_clk_text", "#FFFFFF")
             "ios_notes" -> P.s(this, 0, "ios_notes_text", "#FFFFFF")
+            "music_41", "music_22" -> P.s(this, 0, "music_text", "#FFFFFF")
             "clock" -> P.s(this, 0, "clock_text", "#FFFFFF")
             "weather" -> P.s(this, 0, "weather_text", "#FFFFFF")
             "link" -> P.s(this, 0, "link_text", "#FFFFFF")
@@ -292,6 +336,7 @@ class MainActivity : AppCompatActivity() {
             "ios_battery" -> "ios_bat_text"
             "ios_clock" -> "ios_clk_text"
             "ios_notes" -> "ios_notes_text"
+            "music_41", "music_22" -> "music_text"
             "clock" -> "clock_text"
             "weather" -> "weather_text"
             "link" -> "link_text"
@@ -307,6 +352,7 @@ class MainActivity : AppCompatActivity() {
             "ios_battery" -> P.s(this, 0, "ios_bat_accent", "#34C759")
             "ios_clock" -> P.s(this, 0, "ios_clk_accent", "#FF9500")
             "ios_notes" -> P.s(this, 0, "ios_notes_accent", "#0A84FF")
+            "music_41", "music_22" -> P.s(this, 0, "music_accent", "#1DB954")
             else -> "#EF4444"
         }
     }
@@ -317,6 +363,7 @@ class MainActivity : AppCompatActivity() {
             "ios_battery" -> "ios_bat_accent"
             "ios_clock" -> "ios_clk_accent"
             "ios_notes" -> "ios_notes_accent"
+            "music_41", "music_22" -> "music_accent"
             else -> "cal_head"
         }
         P.put(this, 0, key, hex)
@@ -476,6 +523,8 @@ class MainActivity : AppCompatActivity() {
             "ios_battery" -> U.generateIosBatteryBitmap(this, 0, 2, 2)
             "ios_clock" -> U.generateIosClockBitmap(this, 0, 2, 2)
             "ios_notes" -> U.generateIosNotesBitmap(this, 0, 2, 2)
+            "music_41" -> U.generateMusicBitmap(this, 0, 4, 1)
+            "music_22" -> U.generateMusicBitmap(this, 0, 2, 2)
             "date" -> U.generateIosCalendarBitmap(this, 0, 2, 2)
             "clock" -> U.generateIosClockBitmap(this, 0, 2, 2)
             "weather" -> U.generateIosWeatherBitmap(this, 0, 2, 2)
@@ -623,6 +672,31 @@ class MainActivity : AppCompatActivity() {
         }
 
         saveAllSettings()
+
+        if (activeWidget == "music_41" || activeWidget == "music_22") {
+            val sizes = arrayOf(
+                "🎵 4x1 Banner (1x4 Yana Uzatılabilir)",
+                "🎵 3x1 Banner (1x3 Yana Uzatılabilir)",
+                "🎵 2x2 Kare Kart (AOD & Kilit Ekranı Uyumlu)",
+                "🎵 4x2 Büyük Kart (Geniş Albüm Oynatıcı)"
+            )
+            val classes = arrayOf(
+                MusicW41::class.java,
+                MusicW31::class.java,
+                MusicW22::class.java,
+                MusicW42::class.java
+            )
+            AlertDialog.Builder(this)
+                .setTitle("Spotify Widget Formatı Seçin")
+                .setItems(sizes) { _, which ->
+                    val provider = ComponentName(this, classes[which])
+                    appWidgetManager.requestPinAppWidget(provider, null, null)
+                    Toast.makeText(this, "${sizes[which].substringBefore('(').trim()} ana ekrana eklendi!", Toast.LENGTH_SHORT).show()
+                }
+                .setNegativeButton("İptal", null)
+                .show()
+            return
+        }
 
         val providerClass = when (activeWidget) {
             "ios_calendar" -> IosCalendarW22::class.java

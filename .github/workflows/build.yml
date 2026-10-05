@@ -32,8 +32,8 @@ jobs:
       - name: Prepare APK for Release
         run: |
           mkdir -p release_apk
-          cp app/build/outputs/apk/release/*.apk release_apk/SenleWidgets-v2.2.apk || true
-          cp app/build/outputs/apk/debug/*.apk release_apk/SenleWidgets-v2.2-debug.apk || true
+          cp app/build/outputs/apk/release/*.apk release_apk/SenleWidgets-v2.3.apk || true
+          cp app/build/outputs/apk/debug/*.apk release_apk/SenleWidgets-v2.3-debug.apk || true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -46,16 +46,23 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-          tag_name: v2.2.0
-          name: "Senle Widgets v2.2 (Samsung One UI 8.5 & Drive Kurulum Uyumlu)"
+          tag_name: v2.3.0
+          name: "Senle Widgets v2.3 (Spotify, Kilit Ekranı & AOD Müzik Paketi)"
           body: |
-            ## 📱 Senle Widgets v2.2 - Kalıcı Sertifikalı ve Drive Kurulum Uyumlu
-            
-            Bu sürüm **Kalıcı Release Keystore Sertifikası (v1 + v2 + v3)** ile imzalanmıştır. Google Drive ve Samsung One UI 8.5'te kurulum hatası ("Bir sorun oluştu / Paket ayrıştırılamadı") almamak için:
-            
-            1. **Önceki sürümü telefonunuzdan kaldırın** (farklı debug anahtarıyla yüklendiği için çakışmayı önlemek amacıyla).
-            2. Google Drive'da dosyanın yanındaki **3 noktaya (⋮)** basıp **"İndir"** (Download) deyin.
-            3. Samsung **"Dosyalarım" (My Files)** -> **"İndirilenler"** bölümünden `SenleWidgets-v2.2.apk` dosyasına dokunarak kurun!
+            ## 🎵 Senle Widgets v2.3 - Spotify & AOD Müzik Paketi
+
+            Bu sürümle birlikte Samsung One UI 8.5 ve Apple iOS tarzı Spotify & Medya Oynatıcı widget'ları eklendi!
+
+            ### ✨ Yenilikler:
+            - **🎵 Spotify & Medya Çalar Widget'ları:**
+              - **4x1 & 3x1 Yatay Banner:** 1x4 ve 1x3 formatında yana uzatılabilir kompakt müzik banner'ı.
+              - **2x2 & 4x2 Kartlar:** Kare albüm kapağı odaklı modern iOS tarzı kart tasarımı.
+              - **Canlı Şarkı Bilgileri:** Çalan parça adı, sanatçı ve yüksek kaliteli albüm kapağı.
+              - **Etkileşimli Kontroller:** Önceki şarkı (⏮), Oynat/Durdur (▶/⏸), Sonraki şarkı (⏭) ve doğrudan Spotify açma.
+            - **🔒 Kilit Ekranı & Always On Display (AOD) Uyumu:**
+              - `keyguard|home_screen` desteği ile Samsung One UI 8.5 kilit ekranı ve AOD widget menüsünde doğrudan kullanılabilir.
+            - **🔐 Kalıcı Release Keystore Sertifikası (v1 + v2 + v3):**
+              - Google Drive ve cihaz hafızasından sorunsuz kurulum ("Paket ayrıştırılamadı" hatası vermez).
           files: release_apk/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

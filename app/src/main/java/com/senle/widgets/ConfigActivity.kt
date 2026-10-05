@@ -40,6 +40,7 @@ class ConfigActivity : AppCompatActivity() {
             className.contains("Clock") -> "clock"
             className.contains("Notes") -> "notes"
             className.contains("Link") -> "link"
+            className.contains("Music") -> "music"
             else -> "calendar"
         }
 
@@ -127,6 +128,12 @@ class ConfigActivity : AppCompatActivity() {
                 addEditText("Arka Plan Rengi", "link_bg", "#4F46E5")
                 addEditText("Yazı Rengi", "link_text", "#FFFFFF")
                 addOpacitySeeker("link_opacity", 100)
+            }
+            "music" -> {
+                addEditText("Kart Arka Plan Rengi", "music_bg", "#121212")
+                addEditText("Yazı / Buton Rengi", "music_text", "#FFFFFF")
+                addEditText("Vurgu Rengi (Spotify Yeşili)", "music_accent", "#1DB954")
+                addOpacitySeeker("music_opacity", 90)
             }
         }
 

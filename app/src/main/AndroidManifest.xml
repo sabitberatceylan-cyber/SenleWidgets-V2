@@ -7,7 +7,8 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <queries>
-        <!-- Samsung One UI 8.5 Uygulamaları -->
+        <!-- Spotify ve Samsung One UI 8.5 Uygulamaları -->
+        <package android:name="com.spotify.music" />
         <package android:name="com.samsung.android.calendar" />
         <package android:name="com.sec.android.app.clockpackage" />
         <package android:name="com.sec.android.daemonapp" />
@@ -46,6 +47,28 @@
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
+
+        <!-- Spotify / Medya Dinleme Servisi -->
+        <service
+            android:name=".MediaListenerService"
+            android:label="Senle Widgets Müzik Servisi"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+        <!-- Medya Buton Aksiyon Alıcısı -->
+        <receiver
+            android:name=".MediaActionReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.senle.widgets.ACTION_MEDIA_PREV" />
+                <action android:name="com.senle.widgets.ACTION_MEDIA_PLAY_PAUSE" />
+                <action android:name="com.senle.widgets.ACTION_MEDIA_NEXT" />
+            </intent-filter>
+        </receiver>
 
         <!-- Standart Saat Widget'ları -->
         <receiver android:name=".ClockW21" android:exported="true" android:label="Saat 2x1">
@@ -143,6 +166,24 @@
         <receiver android:name=".IosNotesW22" android:exported="true" android:label="🍎 iOS Notlar/Hatırlatıcı 2x2">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_ios_notes_22" />
+        </receiver>
+
+        <!-- 🎵 Spotify & Medya Oynatıcı Widget'ları (Kilit Ekranı / AOD / 1x3, 1x4, 2x2, 4x2 Uyumlu) -->
+        <receiver android:name=".MusicW41" android:exported="true" android:label="🎵 Spotify Banner 4x1 (1x4 Yana Uzatılabilir)">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_music_41" />
+        </receiver>
+        <receiver android:name=".MusicW31" android:exported="true" android:label="🎵 Spotify Banner 3x1 (1x3 Yana Uzatılabilir)">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_music_31" />
+        </receiver>
+        <receiver android:name=".MusicW22" android:exported="true" android:label="🎵 Spotify Kare Kart 2x2 (AOD Uyumlu)">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_music_22" />
+        </receiver>
+        <receiver android:name=".MusicW42" android:exported="true" android:label="🎵 Spotify Büyük Kart 4x2">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/info_music_42" />
         </receiver>
 
     </application>
