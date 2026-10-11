@@ -184,14 +184,6 @@ object U {
         rv.setCharSequence(R.id.time, "setFormat12Hour", tf)
         rv.setTextColor(R.id.time, tc)
 
-        val timeSp = when {
-            rows >= 2 && cols >= 3 -> 56f
-            rows >= 2 -> 48f
-            cols >= 3 -> 38f
-            else -> 32f
-        }
-        rv.setTextViewTextSize(R.id.time, TypedValue.COMPLEX_UNIT_SP, timeSp)
-
         val df = if (P.b(c, id, "clock_wd", true)) "d MMMM EEEE" else "d MMMM yyyy"
         val show = P.b(c, id, "clock_showDate", true)
         val pos = P.s(c, id, "clock_pos", "bottom")
@@ -913,13 +905,8 @@ object U {
         val rv = RemoteViews(c.packageName, R.layout.w_music_41)
         val isPlaying = MediaHolder.isPlaying
 
-        val hideIdle = P.b(c, id, "music_hide_idle", P.b(c, 0, "music_hide_idle", false))
-        if (hideIdle && !isPlaying) {
-            rv.setViewVisibility(R.id.root, View.GONE)
-            return rv
-        } else {
-            rv.setViewVisibility(R.id.root, View.VISIBLE)
-        }
+        // 4x1 banner widget şarkı yokken de görünür kalır
+        rv.setViewVisibility(R.id.root, View.VISIBLE)
 
         val tc = col(P.s(c, id, "music_text", "#FFFFFF"), Color.WHITE)
         val opacity = P.i(c, id, "music_opacity", 90)
@@ -978,12 +965,15 @@ object U {
         val rv = RemoteViews(c.packageName, R.layout.w_music_22)
         val isPlaying = MediaHolder.isPlaying
 
-        val hideIdle = P.b(c, id, "music_hide_idle", P.b(c, 0, "music_hide_idle", false))
+        // Kullanıcı talebi: SADECE 2x2 widget Spotify için şarkı yokken görünmez olsun
+        val hideIdle = P.b(c, id, "music_22_hide_idle", P.b(c, id, "music_hide_idle", true))
         if (hideIdle && !isPlaying) {
+            rv.setViewVisibility(R.id.root, View.GONE)
             rv.setViewVisibility(R.id.music_content, View.GONE)
             rv.setViewVisibility(R.id.music_bg, View.GONE)
             return rv
         } else {
+            rv.setViewVisibility(R.id.root, View.VISIBLE)
             rv.setViewVisibility(R.id.music_content, View.VISIBLE)
             rv.setViewVisibility(R.id.music_bg, View.VISIBLE)
         }
@@ -1059,13 +1049,8 @@ object U {
         val rv = RemoteViews(c.packageName, R.layout.w_music_lockscreen)
         val isPlaying = MediaHolder.isPlaying
 
-        val hideIdle = P.b(c, id, "music_hide_idle", P.b(c, 0, "music_hide_idle", false))
-        if (hideIdle && !isPlaying) {
-            rv.setViewVisibility(R.id.root, View.GONE)
-            return rv
-        } else {
-            rv.setViewVisibility(R.id.root, View.VISIBLE)
-        }
+        // Kilit ekranı pill widget daima görünür kalır
+        rv.setViewVisibility(R.id.root, View.VISIBLE)
 
         val title = P.s(c, 0, "music_title", MediaHolder.songTitle)
         val artist = P.s(c, 0, "music_artist", MediaHolder.artistName)
