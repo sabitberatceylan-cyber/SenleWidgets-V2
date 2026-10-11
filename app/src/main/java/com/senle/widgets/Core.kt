@@ -184,6 +184,14 @@ object U {
         rv.setCharSequence(R.id.time, "setFormat12Hour", tf)
         rv.setTextColor(R.id.time, tc)
 
+        val timeSp = when {
+            rows >= 2 && cols >= 3 -> 56f
+            rows >= 2 -> 48f
+            cols >= 3 -> 38f
+            else -> 32f
+        }
+        rv.setTextViewTextSize(R.id.time, TypedValue.COMPLEX_UNIT_SP, timeSp)
+
         val df = if (P.b(c, id, "clock_wd", true)) "d MMMM EEEE" else "d MMMM yyyy"
         val show = P.b(c, id, "clock_showDate", true)
         val pos = P.s(c, id, "clock_pos", "bottom")
@@ -826,9 +834,30 @@ object U {
     }
 
     private fun iosClock(c: Context, id: Int, cols: Int, rows: Int): RemoteViews {
-        val rv = RemoteViews(c.packageName, R.layout.w_ios_card)
-        val bmp = generateIosClockBitmap(c, id, cols, rows)
-        rv.setImageViewBitmap(R.id.card_img, bmp)
+        val layoutRes = if (rows == 1) R.layout.w_ios_clock_21 else R.layout.w_ios_clock_22
+        val rv = RemoteViews(c.packageName, layoutRes)
+
+        val opacity = P.i(c, id, "ios_clk_opacity", 100)
+        val cardBg = col(P.s(c, id, "ios_clk_bg", "#18181B"), Color.parseColor("#18181B"))
+        val textColor = col(P.s(c, id, "ios_clk_text", "#FFFFFF"), Color.WHITE)
+        val accentColor = col(P.s(c, id, "ios_clk_accent", "#FF9500"), Color.parseColor("#FF9500"))
+
+        rv.setImageViewBitmap(R.id.bg, bg(cardBg, cols, rows, opacity))
+
+        val tf = if (P.b(c, id, "clock_h24", true)) "HH:mm" else "h:mm"
+        rv.setCharSequence(R.id.ios_time, "setFormat24Hour", tf)
+        rv.setCharSequence(R.id.ios_time, "setFormat12Hour", tf)
+        rv.setTextColor(R.id.ios_time, textColor)
+
+        rv.setTextColor(R.id.ios_city, accentColor)
+        val subColor = Color.argb(180, Color.red(textColor), Color.green(textColor), Color.blue(textColor))
+        rv.setTextColor(R.id.ios_date, if (rows == 1) subColor else textColor)
+
+        if (rows >= 2) {
+            try {
+                rv.setTextColor(R.id.ios_sub, subColor)
+            } catch (e: Exception) {}
+        }
 
         val fallbackIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
         rv.setOnClickPendingIntent(R.id.root, launchSamsungOrFallback(c, id, "com.sec.android.app.clockpackage", fallbackIntent))
@@ -862,14 +891,21 @@ object U {
         return PendingIntent.getActivity(c, 8889, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
-    private fun getRoundedCornerBitmap(src: Bitmap, cornerRadius: Float): Bitmap {
-        val out = Bitmap.createBitmap(src.width, src.height, Bitmap.Config.ARGB_8888)
+    private fun getRoundedCornerBitmap(src: Bitmap, cornerRadius: Float, targetSize: Int = 240): Bitmap {
+        val maxDim = maxOf(src.width, src.height)
+        val scale = if (maxDim > targetSize) targetSize.toFloat() / maxDim else 1.0f
+        val targetW = (src.width * scale).toInt().coerceAtLeast(1)
+        val targetH = (src.height * scale).toInt().coerceAtLeast(1)
+        val scaled = if (scale < 1.0f) Bitmap.createScaledBitmap(src, targetW, targetH, true) else src
+        val rad = cornerRadius * scale
+
+        val out = Bitmap.createBitmap(targetW, targetH, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(out)
         val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-        val rect = RectF(0f, 0f, src.width.toFloat(), src.height.toFloat())
-        canvas.drawRoundRect(rect, cornerRadius, cornerRadius, paint)
+        val rect = RectF(0f, 0f, targetW.toFloat(), targetH.toFloat())
+        canvas.drawRoundRect(rect, rad, rad, paint)
         paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
-        canvas.drawBitmap(src, 0f, 0f, paint)
+        canvas.drawBitmap(scaled, 0f, 0f, paint)
         return out
     }
 
@@ -900,7 +936,7 @@ object U {
         val subColor = Color.argb(190, Color.red(tc), Color.green(tc), Color.blue(tc))
         rv.setTextColor(R.id.artist_name, subColor)
 
-        val art = MediaHolder.albumArt
+        val art = MediaHolder.getOrLoadAlbumArt(c)
         if (art != null) {
             val roundedArt = getRoundedCornerBitmap(art, art.width * 0.15f)
             rv.setImageViewBitmap(R.id.album_art, roundedArt)
@@ -934,10 +970,6 @@ object U {
         }
         val nextPending = PendingIntent.getBroadcast(c, id * 10 + 3, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         rv.setOnClickPendingIntent(R.id.btn_next, nextPending)
-
-        val spotifyPending = getSpotifyLaunchIntent(c)
-        rv.setOnClickPendingIntent(R.id.root, spotifyPending)
-        rv.setOnClickPendingIntent(R.id.album_art, spotifyPending)
 
         return rv
     }
@@ -985,7 +1017,7 @@ object U {
         val subColor = Color.argb(190, Color.red(tc), Color.green(tc), Color.blue(tc))
         rv.setTextColor(R.id.artist_name, subColor)
 
-        val art = MediaHolder.albumArt
+        val art = MediaHolder.getOrLoadAlbumArt(c)
         if (art != null) {
             val roundedArt = getRoundedCornerBitmap(art, art.width * 0.15f)
             rv.setImageViewBitmap(R.id.album_art, roundedArt)
@@ -1020,11 +1052,6 @@ object U {
         val nextPending = PendingIntent.getBroadcast(c, id * 10 + 3, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         rv.setOnClickPendingIntent(R.id.btn_next, nextPending)
 
-        // 🎵 Spotify Tıklaması (Stabil haline geri getirildi)
-        val spotifyPending = getSpotifyLaunchIntent(c)
-        rv.setOnClickPendingIntent(R.id.root, spotifyPending)
-        rv.setOnClickPendingIntent(R.id.album_art, spotifyPending)
-
         return rv
     }
 
@@ -1046,7 +1073,7 @@ object U {
         rv.setTextViewText(R.id.song_title, title)
         rv.setTextViewText(R.id.artist_name, artist)
 
-        val art = MediaHolder.albumArt
+        val art = MediaHolder.getOrLoadAlbumArt(c)
         if (art != null) {
             val roundedArt = getRoundedCornerBitmap(art, art.width * 0.2f)
             rv.setImageViewBitmap(R.id.album_art, roundedArt)
@@ -1061,10 +1088,6 @@ object U {
         }
         val playPending = PendingIntent.getBroadcast(c, id * 10 + 2, playIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         rv.setOnClickPendingIntent(R.id.btn_play_pause, playPending)
-
-        val spotifyPending = getSpotifyLaunchIntent(c)
-        rv.setOnClickPendingIntent(R.id.root, spotifyPending)
-        rv.setOnClickPendingIntent(R.id.album_art, spotifyPending)
 
         return rv
     }
@@ -1104,7 +1127,7 @@ object U {
         if (cols >= 3 && rows == 1) {
             val artSize = h * 0.68f
             val artRect = RectF(28f, (h - artSize) / 2f, 28f + artSize, (h + artSize) / 2f)
-            val art = MediaHolder.albumArt
+            val art = MediaHolder.getOrLoadAlbumArt(c)
             if (art != null) {
                 val roundArt = getRoundedCornerBitmap(art, art.width * 0.18f)
                 cv.drawBitmap(roundArt, null, artRect, paint)
@@ -1158,7 +1181,7 @@ object U {
             val artLeft = (w - artSize) / 2f
             val artTop = 40f
             val artRect = RectF(artLeft, artTop, artLeft + artSize, artTop + artSize)
-            val art = MediaHolder.albumArt
+            val art = MediaHolder.getOrLoadAlbumArt(c)
             if (art != null) {
                 val roundArt = getRoundedCornerBitmap(art, art.width * 0.18f)
                 cv.drawBitmap(roundArt, null, artRect, paint)

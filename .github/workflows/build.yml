@@ -32,8 +32,8 @@ jobs:
       - name: Prepare APK for Release
         run: |
           mkdir -p release_apk
-          cp app/build/outputs/apk/release/*.apk release_apk/SenleWidgets-v2.6.apk || true
-          cp app/build/outputs/apk/debug/*.apk release_apk/SenleWidgets-v2.6-debug.apk || true
+          cp app/build/outputs/apk/release/*.apk release_apk/SenleWidgets-v2.7.apk || true
+          cp app/build/outputs/apk/debug/*.apk release_apk/SenleWidgets-v2.7-debug.apk || true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -46,27 +46,26 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-            tag_name: v2.6.0
-            name: "Senle Widgets v2.6 (2x2 Kilit Ekranı Boyutlandırma & Otomatik Gizlenme)"
+            tag_name: v2.7.0
+            name: "Senle Widgets v2.7 (AOD Albüm Kapağı, Sıfır Gecikmeli Saat & Donma Çözümleri)"
             body: |
-              ## 🎵 Senle Widgets v2.6 - 2x2 Kilit Ekranı Onarımı, Büyütme & Otomatik Gizlenme
+              ## 🚀 Senle Widgets v2.7 - AOD/Kilit Ekranı Resim Onarımı, Gecikmesiz Saat & Takılma Çözümleri
 
-              Bu güncelleme ile kullanıcımızın kilit ekranındaki 2x2 Spotify widget'ı eski kusursuz stabil haline geri getirildi ve istenen boyut & gizlenme özellikleri eklendi!
+              Bu sürümde kullanıcımızın bildirdiği 4 kritik sorun kökten çözüldü:
 
-              ### ✨ Yenilikler:
-              - **🔒 2x2 Kilit Ekranı Widget'ı Eski Stabil Haline Döndürüldü:**
-                - Ekrana kilit vurulduğunda araya giren otomatik tam ekran geçişi kaldırıldı.
-                - Widget'a ve albüm kapağına dokunulduğunda doğrudan Spotify uygulamasının açılması sağlandı.
-                - Önceki, Oynat/Durdur ve Sonraki tuşları kilit ekranında anında yanıt verecek şekilde optimize edildi.
-              - **👻 Müzik Çalmazken Kilit Ekranında Otomatik Gizlenme:**
-                - Spotify durduğunda veya şarkı çalmazken widget kilit ekranında tamamen kaybolur (tertemiz duvar kağıdı görünümü).
-                - Spotify'da şarkı başladığı anda widget kilit ekranında canlı albüm kapağıyla otomatik belirir!
-              - **📐 2x2 Widget Büyütme & Ölçeklendirme:**
-                - Uygulama içinden `Normal`, `Büyük (+%25)` ve `Devasa (+Kenarsız)` boyut modları.
-                - Yeni `3x3` ve `4x4` büyük kare kart widget seçenekleri eklendi!
-                - Samsung kilit ekranı ve ana ekranda serbestçe büyütüp küçültebilme desteği (70dp - 600dp).
-              - **🔐 Kalıcı Release Keystore Sertifikası (v1 + v2 + v3):**
-                - Google Drive veya dahili depolamadan sorunsuz tek tıkla kurulum.
+              ### ✨ Yenilikler & Düzeltmeler:
+              - **🚫 Spotify Widget Tıklama Kapatıldı:**
+                - Spotify widget'ına veya albüm kapağına dokunulduğunda istem dışı açılan ekran/uygulama davranışı kaldırıldı.
+                - Artık yalnızca medya kontrol tuşları (Önceki, Oynat/Durdur, Sonraki) tıklamaya yanıt verir.
+              - **🖼️ AOD & Kilit Ekranında 2x2 Albüm Kapağı Görünürlüğü:**
+                - Samsung LockStar / Keyguard üzerinde wrap_content ölçümünde resmin 0 boyuta çökmesi `minHeight="85dp"` ve `minWidth="85dp"` ile engellendi.
+                - Android Binder IPC 1MB sınırına takılmaması için kapak resimleri otomatik 240px güvenli boyuta ölçeklendi ve diske önbelleklendi.
+              - **⏰ Saat Widget'larında Geride Kalma / Donma Tamamen Çözüldü:**
+                - Statik çizim yerine Android SystemUI tarafından her dakika başında :00'da yerel olarak tetiklenen native `TextClock` mimarisine geçildi.
+                - Pil tüketmeden, arka plan kısıtlamalarına takılmadan daima tam vaktinde çalışır.
+              - **⚡ Medya Takılmaları & Senkronizasyon Onarımı:**
+                - `MediaSessionManager.addOnActiveSessionsChangedListener` ile Spotify parça değişimleri anlık yakalanır.
+                - Bağlantı kopmalarına karşı `requestRebind` ve çift aşamalı (200ms & 700ms) arabellek güncellemesi eklendi.
             files: release_apk/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
