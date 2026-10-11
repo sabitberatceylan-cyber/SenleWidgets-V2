@@ -850,6 +850,8 @@ object U {
         if (rows >= 2) {
             try {
                 rv.setTextColor(R.id.ios_sub, subColor)
+                val alarmColor = Color.argb(130, Color.red(textColor), Color.green(textColor), Color.blue(textColor))
+                rv.setTextColor(R.id.ios_alarm, alarmColor)
             } catch (e: Exception) {}
         }
 

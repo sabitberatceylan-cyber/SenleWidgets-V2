@@ -13,52 +13,70 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center_vertical"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="20dp">
 
         <TextView
             android:id="@+id/ios_city"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:letterSpacing="0.05"
+            android:letterSpacing="0.06"
             android:text="DÜNYA SAATİ"
             android:textAllCaps="true"
             android:textColor="#FF9500"
-            android:textSize="13sp"
+            android:textSize="12sp"
             android:textStyle="bold" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
         <TextClock
             android:id="@+id/ios_time"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
             android:format12Hour="h:mm"
             android:format24Hour="HH:mm"
             android:includeFontPadding="false"
             android:textColor="#FFFFFF"
-            android:textSize="38sp"
+            android:textSize="34sp"
             android:textStyle="bold" />
 
         <TextClock
             android:id="@+id/ios_date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="4dp"
             android:format12Hour="EEEE, d MMMM"
             android:format24Hour="EEEE, d MMMM"
+            android:includeFontPadding="false"
             android:textColor="#FFFFFF"
             android:textSize="13sp" />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
 
         <TextView
             android:id="@+id/ios_sub"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
             android:letterSpacing="0.02"
             android:text="İSTANBUL  +0 SAAT"
             android:textColor="#A1A1AA"
-            android:textSize="12sp" />
+            android:textSize="11sp" />
+
+        <TextView
+            android:id="@+id/ios_alarm"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:letterSpacing="0.01"
+            android:text="⏰ Alarm: Açık • One UI 8.5"
+            android:textColor="#71717A"
+            android:textSize="10sp" />
 
     </LinearLayout>
 

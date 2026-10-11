@@ -32,8 +32,8 @@ jobs:
       - name: Prepare APK for Release
         run: |
           mkdir -p release_apk
-          cp app/build/outputs/apk/release/*.apk release_apk/SenleWidgets-v2.9.apk || true
-          cp app/build/outputs/apk/debug/*.apk release_apk/SenleWidgets-v2.9-debug.apk || true
+          cp app/build/outputs/apk/release/*.apk release_apk/SenleWidgets-v2.10.apk || true
+          cp app/build/outputs/apk/debug/*.apk release_apk/SenleWidgets-v2.10-debug.apk || true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -46,20 +46,21 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-            tag_name: v2.9.0
-            name: "Senle Widgets v2.9 (Doğrudan Spotify Açma & Sadece Kilit Ekranında 2x2 Gizleme)"
+            tag_name: v2.10.0
+            name: "Senle Widgets v2.10 (Saat Yazı Boyutu ve Mizanpajı Eski Haline Döndürüldü)"
             body: |
-              ## 🚀 Senle Widgets v2.9 - Doğrudan Spotify Açma & Sadece Kilit Ekranında Gizlenme
-
+              ## 🚀 Senle Widgets v2.10 - Saat Boyutu & Mizanpaj Onarımı
+              
               ### ✨ Yapılan Düzenlemeler:
-              - **🎵 Tıklayınca YALNIZCA Spotify Açılır:**
-                - Spotify widget'larına (kart gövdesine, albüm kapağına veya şarkı adına) dokunulduğunda uygulamamız veya ayarlar değil, doğrudan orijinal **Spotify uygulaması** açılır.
-                - Önceki, Oynat/Durdur ve Sonraki tuşları medya kontrollerini gerçekleştirmeye devam eder.
-              - **🔒 SADECE Kilit Ekranında 2x2 Widget Gizlenir:**
-                - Ana ekrandaki 2x2 Spotify widget'ı şarkı çalsın veya çalmasın daima ekranda görünür kalır.
-                - Yalnızca **kilit ekranına (LockStar / Keyguard)** eklenen 2x2 widget, şarkı çalmazken tamamen gizlenir (`View.GONE`) ve duvar kağıdını temiz tutar. Şarkı başladığında kilit ekranında canlı albüm kapağıyla anında belirir!
-              - **🕒 Saat Yazısı Orijinal Boyutunda:**
-                - Saat widget'ı orijinal autoSize boyutunda ve responsive mizanpajında korunmaktadır.
+              - **🕒 Saat Yazısı Orijinal Boyutuna Döndürüldü:**
+                - Büyüyen ve kartı kaplayan saat punto boyutu Apple Minimal tasarım standartlarına (34sp) ve orijinal ölçeğe geri çekildi.
+              - **📐 Tüm Yazıların Sıkışıklığı Giderildi (Eski Mizanpaj):**
+                - Birbirine yapışan "DÜNYA SAATİ", saat, tarih, şehir bilgisi ve alarm satırları arasındaki dikey boşluklar ve oranlar orijinal ferah haline getirildi (`layout_weight="1"` aralıkları ile mükemmel dengeli yerleşim).
+                - 2x1 ve standart saat widget'larındaki boşluk ve boyutlar da optimize edildi.
+              - **⏰ Geride Kalmayan Canlı TextClock Desteği Korundu:**
+                - Saat donması veya geri kalması engellenerek Android SystemUI destekli gerçek zamanlı akış sürdürüldü.
+              - **🎵 Doğrudan Spotify Açma & Sadece Kilit Ekranında 2x2 Gizleme Korundu:**
+                - v2.9'daki Spotify'a doğrudan yönlendirme ve sadece kilit ekranında 2x2 widget'ın gizlenme özellikleri eksiksiz korunmaktadır.
             files: release_apk/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

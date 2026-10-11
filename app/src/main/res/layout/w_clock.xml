@@ -15,14 +15,14 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
-        android:padding="8dp">
+        android:padding="16dp">
 
         <TextClock
             android:id="@+id/dateTop"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:autoSizeMaxTextSize="40sp"
+            android:autoSizeMaxTextSize="18sp"
             android:autoSizeMinTextSize="8sp"
             android:autoSizeTextType="uniform"
             android:gravity="center"
@@ -34,10 +34,12 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="3"
-            android:autoSizeMaxTextSize="96sp"
+            android:autoSizeMaxTextSize="56sp"
             android:autoSizeMinTextSize="14sp"
             android:autoSizeTextType="uniform"
             android:gravity="center"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
             android:maxLines="1"
             android:textStyle="bold"
             android:textColor="#FFFFFF" />
@@ -47,7 +49,7 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:autoSizeMaxTextSize="40sp"
+            android:autoSizeMaxTextSize="18sp"
             android:autoSizeMinTextSize="8sp"
             android:autoSizeTextType="uniform"
             android:gravity="center"
