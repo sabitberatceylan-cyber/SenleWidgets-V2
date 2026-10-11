@@ -27,7 +27,7 @@ import java.net.URL
 import java.util.Calendar
 
 object P {
-    private fun sp(c: Context) = c.getSharedPreferences("senle_widgets_prefs", Context.MODE_PRIVATE)
+    fun sp(c: Context) = c.getSharedPreferences("senle_widgets_prefs", Context.MODE_PRIVATE)
 
     fun s(c: Context, id: Int, k: String, d: String): String {
         val prefs = sp(c)
