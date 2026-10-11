@@ -206,10 +206,20 @@ class MainActivity : AppCompatActivity() {
         switchMusicHideIdle.isChecked = P.b(this, 0, "music_hide_idle", false)
         switchMusicHideIdle.setOnCheckedChangeListener { _, isChecked ->
             P.put(this, 0, "music_hide_idle", isChecked)
+            val prefs = P.sp(this)
+            val editor = prefs.edit()
+            editor.putBoolean("global_music_hide_idle", isChecked)
+            editor.putBoolean("music_hide_idle", isChecked)
+            for (key in prefs.all.keys) {
+                if (key.endsWith("_music_hide_idle")) {
+                    editor.putBoolean(key, isChecked)
+                }
+            }
+            editor.apply()
             U.updateAll(this)
             Toast.makeText(
                 this,
-                if (isChecked) "Müzik durunca widget kilit ekranında gizlenecek" else "Widget kilit ekranında her zaman görünecek",
+                if (isChecked) "Müzik durunca widget tamamen gizlenecek" else "Widget her zaman görünecek",
                 Toast.LENGTH_SHORT
             ).show()
         }
@@ -603,8 +613,20 @@ class MainActivity : AppCompatActivity() {
     private fun saveAllSettings() {
         P.put(this, 0, "clock_showDate", switchShowDate.isChecked)
         P.put(this, 0, "clock_h24", switch24Hour.isChecked)
+        P.put(this, 0, "music_hide_idle", switchMusicHideIdle.isChecked)
         P.put(this, 0, "link_url", etLinkUrl.text.toString().trim())
         P.put(this, 0, "link_top", etLinkTop.text.toString().trim())
+
+        val prefs = P.sp(this)
+        val editor = prefs.edit()
+        editor.putBoolean("global_music_hide_idle", switchMusicHideIdle.isChecked)
+        editor.putBoolean("music_hide_idle", switchMusicHideIdle.isChecked)
+        for (key in prefs.all.keys) {
+            if (key.endsWith("_music_hide_idle")) {
+                editor.putBoolean(key, switchMusicHideIdle.isChecked)
+            }
+        }
+        editor.apply()
     }
 
     private fun updateLivePreview() {

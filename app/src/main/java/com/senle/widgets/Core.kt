@@ -9,6 +9,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.*
+import android.media.AudioManager
+import android.media.session.PlaybackState
 import android.net.Uri
 import android.os.BatteryManager
 import android.provider.AlarmClock
@@ -903,12 +905,55 @@ object U {
         return out
     }
 
+    fun isMusicPlaying(c: Context): Boolean {
+        try {
+            val am = c.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+            if (am != null && !am.isMusicActive) {
+                MediaHolder.isPlaying = false
+                return false
+            }
+        } catch (e: Exception) {}
+
+        val controller = MediaHolder.activeController
+        if (controller != null) {
+            val state = controller.playbackState?.state
+            val playing = (state == PlaybackState.STATE_PLAYING)
+            MediaHolder.isPlaying = playing
+            return playing
+        }
+        return MediaHolder.isPlaying
+    }
+
     private fun music41(c: Context, id: Int, cols: Int, rows: Int): RemoteViews {
         val rv = RemoteViews(c.packageName, R.layout.w_music_41)
-        val isPlaying = MediaHolder.isPlaying
+        val isPlaying = isMusicPlaying(c)
 
-        // 4x1 banner widget şarkı yokken de görünür kalır
-        rv.setViewVisibility(R.id.root, View.VISIBLE)
+        val hideSetting = P.b(c, id, "music_hide_idle", false) || P.b(c, 0, "music_hide_idle", false)
+        val isKeyguard = try {
+            val appWidgetManager = AppWidgetManager.getInstance(c)
+            val opts = appWidgetManager.getAppWidgetOptions(id)
+            val cat = opts?.getInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY, -1) ?: -1
+            cat == AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD
+        } catch (e: Exception) { false }
+
+        val shouldHideOnIdle = (hideSetting || isKeyguard) && id != 0
+
+        if (shouldHideOnIdle && !isPlaying) {
+            rv.setViewVisibility(R.id.root, View.GONE)
+            try { rv.setViewVisibility(R.id.music_content, View.GONE) } catch (e: Exception) {}
+            rv.setViewVisibility(R.id.music_bg, View.GONE)
+            val transparentBmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+            rv.setImageViewBitmap(R.id.music_bg, transparentBmp)
+            rv.setOnClickPendingIntent(R.id.root, null)
+            rv.setOnClickPendingIntent(R.id.album_art, null)
+            rv.setOnClickPendingIntent(R.id.song_title, null)
+            rv.setOnClickPendingIntent(R.id.artist_name, null)
+            return rv
+        } else {
+            rv.setViewVisibility(R.id.root, View.VISIBLE)
+            try { rv.setViewVisibility(R.id.music_content, View.VISIBLE) } catch (e: Exception) {}
+            rv.setViewVisibility(R.id.music_bg, View.VISIBLE)
+        }
 
         val tc = col(P.s(c, id, "music_text", "#FFFFFF"), Color.WHITE)
         val opacity = P.i(c, id, "music_opacity", 90)
@@ -972,35 +1017,28 @@ object U {
 
     private fun music22(c: Context, id: Int, cols: Int, rows: Int, m: AppWidgetManager? = null): RemoteViews {
         val rv = RemoteViews(c.packageName, R.layout.w_music_22)
-        val isPlaying = MediaHolder.isPlaying
+        val isPlaying = isMusicPlaying(c)
 
-        // 🔒 Kilit ekranı tespiti:
-        // Ana ekrandaki (WIDGET_CATEGORY_HOME_SCREEN) 2x2 widget şarkı yokken ASLA gizlenmez.
-        // Sadece kilit ekranındaki (WIDGET_CATEGORY_KEYGUARD veya kilit alanı) 2x2 widget şarkı yokken gizlenir.
-        val shouldHideOnIdle = if (id == 0) {
-            false
-        } else {
+        val hideSetting = P.b(c, id, "music_hide_idle", false) || P.b(c, 0, "music_hide_idle", false)
+        val isKeyguard = try {
             val appWidgetManager = m ?: AppWidgetManager.getInstance(c)
-            val opts = try { appWidgetManager.getAppWidgetOptions(id) } catch (e: Exception) { null }
+            val opts = appWidgetManager.getAppWidgetOptions(id)
             val cat = opts?.getInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY, -1) ?: -1
-            val isHomeScreen = (cat == AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN)
-            val isKeyguard = (cat == AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD)
+            cat == AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD
+        } catch (e: Exception) { false }
 
-            if (isHomeScreen) {
-                false // Ana ekranda daima görünür kalır
-            } else if (isKeyguard) {
-                true // Kilit ekranında şarkı yokken gizlenir
-            } else {
-                val km = c.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
-                val isLocked = km?.isKeyguardLocked == true
-                P.b(c, id, "music_hide_idle", isLocked)
-            }
-        }
+        val shouldHideOnIdle = (hideSetting || isKeyguard) && id != 0
 
         if (shouldHideOnIdle && !isPlaying) {
             rv.setViewVisibility(R.id.root, View.GONE)
             rv.setViewVisibility(R.id.music_content, View.GONE)
             rv.setViewVisibility(R.id.music_bg, View.GONE)
+            val transparentBmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
+            rv.setImageViewBitmap(R.id.music_bg, transparentBmp)
+            rv.setOnClickPendingIntent(R.id.root, null)
+            rv.setOnClickPendingIntent(R.id.album_art, null)
+            rv.setOnClickPendingIntent(R.id.song_title, null)
+            rv.setOnClickPendingIntent(R.id.artist_name, null)
             return rv
         } else {
             rv.setViewVisibility(R.id.root, View.VISIBLE)
@@ -1084,10 +1122,20 @@ object U {
 
     private fun musicLock(c: Context, id: Int, cols: Int, rows: Int): RemoteViews {
         val rv = RemoteViews(c.packageName, R.layout.w_music_lockscreen)
-        val isPlaying = MediaHolder.isPlaying
+        val isPlaying = isMusicPlaying(c)
 
-        // Kilit ekranı pill widget daima görünür kalır
-        rv.setViewVisibility(R.id.root, View.VISIBLE)
+        val hideSetting = P.b(c, id, "music_hide_idle", false) || P.b(c, 0, "music_hide_idle", false)
+        val shouldHideOnIdle = hideSetting && id != 0
+
+        if (shouldHideOnIdle && !isPlaying) {
+            rv.setViewVisibility(R.id.root, View.GONE)
+            rv.setOnClickPendingIntent(R.id.root, null)
+            rv.setOnClickPendingIntent(R.id.album_art, null)
+            rv.setOnClickPendingIntent(R.id.song_title, null)
+            return rv
+        } else {
+            rv.setViewVisibility(R.id.root, View.VISIBLE)
+        }
 
         val title = P.s(c, 0, "music_title", MediaHolder.songTitle)
         val artist = P.s(c, 0, "music_artist", MediaHolder.artistName)

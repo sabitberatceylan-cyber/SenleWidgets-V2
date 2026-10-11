@@ -136,8 +136,8 @@ class ConfigActivity : AppCompatActivity() {
                 addOpacitySeeker("music_opacity", 90)
 
                 val swHide = SwitchMaterial(this).apply {
-                    text = "Müzik Çalmazken Kilitte Gizle"
-                    isChecked = P.b(this@ConfigActivity, appWidgetId, "music_hide_idle", false)
+                    text = "Müzik Çalmazken Gizle"
+                    isChecked = P.b(this@ConfigActivity, appWidgetId, "music_hide_idle", P.b(this@ConfigActivity, 0, "music_hide_idle", false))
                     setTextColor(Color.parseColor("#F8FAFC"))
                     setPadding(0, 16, 0, 8)
                 }

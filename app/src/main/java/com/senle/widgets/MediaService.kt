@@ -148,6 +148,7 @@ object MediaHolder {
             isPlaying = false
             durationMs = 0L
             positionMs = 0L
+            P.put(c, 0, "music_is_playing", false)
             notifyListeners()
             return
         }
