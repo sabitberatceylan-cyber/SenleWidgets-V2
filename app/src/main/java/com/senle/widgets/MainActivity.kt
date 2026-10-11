@@ -219,7 +219,7 @@ class MainActivity : AppCompatActivity() {
             U.updateAll(this)
             Toast.makeText(
                 this,
-                if (isChecked) "Müzik durunca widget tamamen gizlenecek" else "Widget her zaman görünecek",
+                if (isChecked) "Müzik durunca 2x2 widget 1 dk sonra gizlenecek" else "2x2 widget her zaman görünecek",
                 Toast.LENGTH_SHORT
             ).show()
         }

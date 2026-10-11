@@ -890,7 +890,7 @@
                             android:id="@+id/switchMusicHideIdle"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Müzik Çalmazken Kilitte Gizle (Otomatik Kaybolma)"
+                            android:text="Müzik Çalmazken 2x2 Widget'ı Gizle (1 Dk Sonra Kaybolur)"
                             android:checked="false"
                             android:textColor="#F8FAFC"
                             android:layout_marginBottom="10dp" />

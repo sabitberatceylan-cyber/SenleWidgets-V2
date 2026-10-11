@@ -32,8 +32,8 @@ jobs:
       - name: Prepare APK for Release
         run: |
           mkdir -p release_apk
-          cp app/build/outputs/apk/release/*.apk release_apk/SenleWidgets-v2.11.apk || true
-          cp app/build/outputs/apk/debug/*.apk release_apk/SenleWidgets-v2.11-debug.apk || true
+          cp app/build/outputs/apk/release/*.apk release_apk/SenleWidgets-v2.12.apk || true
+          cp app/build/outputs/apk/debug/*.apk release_apk/SenleWidgets-v2.12-debug.apk || true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -46,22 +46,21 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-            tag_name: v2.11.0
-            name: "Senle Widgets v2.11 (Müzik Çalmazken Gizle Onarımı & Donanım Ses Senkronizasyonu)"
+            tag_name: v2.12.0
+            name: "Senle Widgets v2.12 (Sadece 2x2 Gizleme, 1 Dk Mola Koruması & Orijinal iPhone Saat)"
             body: |
-              ## 🚀 Senle Widgets v2.11 - Müzik Çalmazken Gizle Onarımı
+              ## 🚀 Senle Widgets v2.12 - Sadece 2x2 Gizleme, 1 Dk Mola Süresi & İlk Orijinal iPhone Saat
               
               ### ✨ Yapılan Düzenlemeler:
-              - **👻 Müzik Çalmazken Gizle Sorunu Tamamen Düzeltildi:**
-                - Ana uygulamada veya widget ayarlarında "Müzik çalmazken gizle" açıldığında, şarkı durduğu an widget'ın ekranda kalmasına sebep olan filtre ve ana ekran kısıtlaması kaldırıldı.
-                - Tüm müzik widget'ları (2x2, 4x1 ve Kilit Ekranı) ayar açıkken müzik durduğu/duraklatıldığı an ekrandan tamamen kaybolur (`View.GONE` + 1x1 şeffaf bitmap).
-                - Spotify'da şarkı çalmaya başladığı anda canlı albüm kapağıyla birlikte otomatik olarak ekranda belirir.
-              - **🔊 Donanımsal Ses Durumu (AudioManager) Entegrasyonu:**
-                - Medya oturumu gecikmelerine takılmamak için cihazın donanımsal ses durumu doğrudan denetlenir, müzik kapandığı an widget anında gizlenir.
-              - **⚙️ Ayar Senkronizasyonu:**
-                - Ana uygulamadaki anahtar değiştirildiğinde veya "Kaydet ve Uygula"ya basıldığında mevcut tüm eklenmiş widget'lar tek seferde yeni ayara senkronize edilir.
-              - **🕒 Saat Tasarımı & Spotify Direkt Açma:**
-                - v2.10 ile getirilen dengeli saat mizanpajı ve Spotify'ı doğrudan açma özellikleri eksiksiz korunmaktadır.
+              - **👻 SADECE 2x2 Widget Gizlenir (4x1 ve Kilit Ekranı Sabit):**
+                - Kullanıcının kesin talebi doğrultusunda 4x1 banner ve kilit ekranı hap widget'ı asla kaybolmaz, ekranda sabit kalır.
+                - Yalnızca 2x2 müzik kartı şarkı çalmazken gizlenir.
+              - **⏱️ 1 Dakika Mola / Duraklatma Koruması:**
+                - Widget üzerinden şarkı duraklatıldığında veya durduğunda widget hemen kaybolmaz; 1 dakika boyunca ekranda kalarak kullanıcının tekrar oynatmasına veya parça değiştirmesine imkan tanır.
+                - 1 dakika boyunca yeni şarkı başlatılmazsa widget nazikçe ekrandan kaybolur.
+              - **🍎 Orijinal iPhone Saat Kartı Geri Getirildi:**
+                - Kullanıcının çok beğendiği ilk orijinal tasarım (`generateIosClockBitmap` + `w_ios_card`) birebir geri yüklendi.
+                - Apple Minimal turuncu başlık, kusursuz oranlı saat fontu, Türkçe tarih, İstanbul saat farkı ve alarm satırı ilk günkü mükemmel düzeninde!
             files: release_apk/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

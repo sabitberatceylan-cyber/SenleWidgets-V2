@@ -830,32 +830,9 @@ object U {
     }
 
     private fun iosClock(c: Context, id: Int, cols: Int, rows: Int): RemoteViews {
-        val layoutRes = if (rows == 1) R.layout.w_ios_clock_21 else R.layout.w_ios_clock_22
-        val rv = RemoteViews(c.packageName, layoutRes)
-
-        val opacity = P.i(c, id, "ios_clk_opacity", 100)
-        val cardBg = col(P.s(c, id, "ios_clk_bg", "#18181B"), Color.parseColor("#18181B"))
-        val textColor = col(P.s(c, id, "ios_clk_text", "#FFFFFF"), Color.WHITE)
-        val accentColor = col(P.s(c, id, "ios_clk_accent", "#FF9500"), Color.parseColor("#FF9500"))
-
-        rv.setImageViewBitmap(R.id.bg, bg(cardBg, cols, rows, opacity))
-
-        val tf = if (P.b(c, id, "clock_h24", true)) "HH:mm" else "h:mm"
-        rv.setCharSequence(R.id.ios_time, "setFormat24Hour", tf)
-        rv.setCharSequence(R.id.ios_time, "setFormat12Hour", tf)
-        rv.setTextColor(R.id.ios_time, textColor)
-
-        rv.setTextColor(R.id.ios_city, accentColor)
-        val subColor = Color.argb(180, Color.red(textColor), Color.green(textColor), Color.blue(textColor))
-        rv.setTextColor(R.id.ios_date, if (rows == 1) subColor else textColor)
-
-        if (rows >= 2) {
-            try {
-                rv.setTextColor(R.id.ios_sub, subColor)
-                val alarmColor = Color.argb(130, Color.red(textColor), Color.green(textColor), Color.blue(textColor))
-                rv.setTextColor(R.id.ios_alarm, alarmColor)
-            } catch (e: Exception) {}
-        }
+        val rv = RemoteViews(c.packageName, R.layout.w_ios_card)
+        val bmp = generateIosClockBitmap(c, id, cols, rows)
+        rv.setImageViewBitmap(R.id.card_img, bmp)
 
         val fallbackIntent = Intent(AlarmClock.ACTION_SHOW_ALARMS)
         rv.setOnClickPendingIntent(R.id.root, launchSamsungOrFallback(c, id, "com.sec.android.app.clockpackage", fallbackIntent))
@@ -928,32 +905,10 @@ object U {
         val rv = RemoteViews(c.packageName, R.layout.w_music_41)
         val isPlaying = isMusicPlaying(c)
 
-        val hideSetting = P.b(c, id, "music_hide_idle", false) || P.b(c, 0, "music_hide_idle", false)
-        val isKeyguard = try {
-            val appWidgetManager = AppWidgetManager.getInstance(c)
-            val opts = appWidgetManager.getAppWidgetOptions(id)
-            val cat = opts?.getInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY, -1) ?: -1
-            cat == AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD
-        } catch (e: Exception) { false }
-
-        val shouldHideOnIdle = (hideSetting || isKeyguard) && id != 0
-
-        if (shouldHideOnIdle && !isPlaying) {
-            rv.setViewVisibility(R.id.root, View.GONE)
-            try { rv.setViewVisibility(R.id.music_content, View.GONE) } catch (e: Exception) {}
-            rv.setViewVisibility(R.id.music_bg, View.GONE)
-            val transparentBmp = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888)
-            rv.setImageViewBitmap(R.id.music_bg, transparentBmp)
-            rv.setOnClickPendingIntent(R.id.root, null)
-            rv.setOnClickPendingIntent(R.id.album_art, null)
-            rv.setOnClickPendingIntent(R.id.song_title, null)
-            rv.setOnClickPendingIntent(R.id.artist_name, null)
-            return rv
-        } else {
-            rv.setViewVisibility(R.id.root, View.VISIBLE)
-            try { rv.setViewVisibility(R.id.music_content, View.VISIBLE) } catch (e: Exception) {}
-            rv.setViewVisibility(R.id.music_bg, View.VISIBLE)
-        }
+        // 4x1 banner widget şarkı çalsın veya çalmasın DAİMA görünür kalır (Kullanıcı talebi: SADECE 2x2 gizlensin)
+        rv.setViewVisibility(R.id.root, View.VISIBLE)
+        try { rv.setViewVisibility(R.id.music_content, View.VISIBLE) } catch (e: Exception) {}
+        rv.setViewVisibility(R.id.music_bg, View.VISIBLE)
 
         val tc = col(P.s(c, id, "music_text", "#FFFFFF"), Color.WHITE)
         val opacity = P.i(c, id, "music_opacity", 90)
@@ -1027,7 +982,12 @@ object U {
             cat == AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD
         } catch (e: Exception) { false }
 
-        val shouldHideOnIdle = (hideSetting || isKeyguard) && id != 0
+        // 1 dakikalık duraklatma süresi (grace period):
+        // Kullanıcı şarkıyı widget'tan durdurursa 1 dakika boyunca widget ekranda kalır.
+        // 1 dakika dolduğunda ve şarkı hala çalmıyorsa gizlenir.
+        val inGracePeriod = (MediaHolder.lastPauseTime > 0L && (System.currentTimeMillis() - MediaHolder.lastPauseTime) < 60_000L)
+
+        val shouldHideOnIdle = (hideSetting || isKeyguard) && id != 0 && !inGracePeriod
 
         if (shouldHideOnIdle && !isPlaying) {
             rv.setViewVisibility(R.id.root, View.GONE)
@@ -1124,18 +1084,8 @@ object U {
         val rv = RemoteViews(c.packageName, R.layout.w_music_lockscreen)
         val isPlaying = isMusicPlaying(c)
 
-        val hideSetting = P.b(c, id, "music_hide_idle", false) || P.b(c, 0, "music_hide_idle", false)
-        val shouldHideOnIdle = hideSetting && id != 0
-
-        if (shouldHideOnIdle && !isPlaying) {
-            rv.setViewVisibility(R.id.root, View.GONE)
-            rv.setOnClickPendingIntent(R.id.root, null)
-            rv.setOnClickPendingIntent(R.id.album_art, null)
-            rv.setOnClickPendingIntent(R.id.song_title, null)
-            return rv
-        } else {
-            rv.setViewVisibility(R.id.root, View.VISIBLE)
-        }
+        // Kilit ekranı pill widget daima görünür kalır (Kullanıcı talebi: SADECE 2x2 gizlensin)
+        rv.setViewVisibility(R.id.root, View.VISIBLE)
 
         val title = P.s(c, 0, "music_title", MediaHolder.songTitle)
         val artist = P.s(c, 0, "music_artist", MediaHolder.artistName)

@@ -27,6 +27,7 @@ object MediaHolder {
     var artistName: String = "Çalan müzik yok • Dokun"
     var albumArt: Bitmap? = null
     var isPlaying: Boolean = false
+    var lastPauseTime: Long = 0L
     var durationMs: Long = 0L
     var positionMs: Long = 0L
     var playbackSpeed: Float = 1.0f
@@ -107,11 +108,18 @@ object MediaHolder {
         val controller = activeController
         if (controller != null) {
             if (isPlaying) {
+                lastPauseTime = System.currentTimeMillis()
                 controller.transportControls?.pause()
             } else {
+                lastPauseTime = 0L
                 controller.transportControls?.play()
             }
         } else {
+            if (isPlaying) {
+                lastPauseTime = System.currentTimeMillis()
+            } else {
+                lastPauseTime = 0L
+            }
             dispatchKeyEvent(c, KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE)
         }
     }
@@ -185,7 +193,15 @@ object MediaHolder {
             }.start()
         }
 
-        isPlaying = pbState?.state == PlaybackState.STATE_PLAYING
+        val newlyPlaying = pbState?.state == PlaybackState.STATE_PLAYING
+        if (newlyPlaying) {
+            lastPauseTime = 0L
+        } else if (isPlaying && !newlyPlaying) {
+            if (lastPauseTime == 0L) {
+                lastPauseTime = System.currentTimeMillis()
+            }
+        }
+        isPlaying = newlyPlaying
         durationMs = metadata?.getLong(MediaMetadata.METADATA_KEY_DURATION) ?: 0L
         positionMs = pbState?.position ?: 0L
         playbackSpeed = pbState?.playbackSpeed ?: 1.0f
@@ -325,6 +341,12 @@ class MediaActionReceiver : BroadcastReceiver() {
             }
             "com.senle.widgets.ACTION_MEDIA_PLAY_PAUSE" -> {
                 MediaHolder.togglePlayPause(appContext)
+                // 1 dakika boyunca kullanıcı tekrar basabilsin diye widget kalır, 1 dk sonra müzik hala çalmıyorsa gizlenir
+                Handler(Looper.getMainLooper()).postDelayed({
+                    if (!MediaHolder.isPlaying) {
+                        U.updateAll(appContext)
+                    }
+                }, 60_000L)
             }
             "com.senle.widgets.ACTION_MEDIA_NEXT" -> {
                 MediaHolder.skipToNext(appContext)
