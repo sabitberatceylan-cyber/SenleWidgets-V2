@@ -32,8 +32,8 @@ jobs:
       - name: Prepare APK for Release
         run: |
           mkdir -p release_apk
-          cp app/build/outputs/apk/release/*.apk release_apk/SenleWidgets-v2.8.apk || true
-          cp app/build/outputs/apk/debug/*.apk release_apk/SenleWidgets-v2.8-debug.apk || true
+          cp app/build/outputs/apk/release/*.apk release_apk/SenleWidgets-v2.9.apk || true
+          cp app/build/outputs/apk/debug/*.apk release_apk/SenleWidgets-v2.9-debug.apk || true
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -46,22 +46,20 @@ jobs:
         if: github.ref == 'refs/heads/main'
         continue-on-error: true
         with:
-            tag_name: v2.8.0
-            name: "Senle Widgets v2.8 (Saat Boyutu Eski Haline Getirildi & Sadece 2x2 Müzik Çalmazken Gizlenme)"
+            tag_name: v2.9.0
+            name: "Senle Widgets v2.9 (Doğrudan Spotify Açma & Sadece Kilit Ekranında 2x2 Gizleme)"
             body: |
-              ## 🚀 Senle Widgets v2.8 - Saat Boyutu Orijinal Haline Getirildi & Sadece 2x2 Gizlenme
+              ## 🚀 Senle Widgets v2.9 - Doğrudan Spotify Açma & Sadece Kilit Ekranında Gizlenme
 
-              ### ✨ Yapılan Değişiklikler:
-              - **🕒 Saat Yazısı Orijinal Boyutuna Döndürüldü:**
-                - Saat widget'ındaki büyütülmüş yazı boyutu kaldırıldı; kullanıcının alıştığı orijinal responsive autoSize boyutuna ve mizanpaja geri getirildi.
-              - **👻 SADECE 2x2 Widget Şarkı Yokken Gizlenir:**
-                - Kullanıcının talebi doğrultusunda yalnızca 2x2 müzik kartı Spotify şarkı çalmazken tamamen gizlenir (`View.GONE`).
-                - 4x1 banner ve kilit ekranı widget'ları şarkı çalmazken de kaybolmaz, ekranda görünür kalmaya devam eder.
-                - Spotify'da şarkı başladığı an 2x2 widget canlı albüm kapağıyla kilit ekranında ve ana ekranda otomatik olarak belirir!
-              - **🚫 Spotify Widget Tıklama Davranışı Koruması:**
-                - Widget arka planına ve albüm kapağına dokunulduğunda istem dışı ekran/uygulama açılması engellendi (sadece kontrol tuşları basılabilir).
-              - **🖼️ AOD & Kilit Ekranı Albüm Kapağı Koruması:**
-                - 240px güvenli IPC Binder ölçekleme ve `minHeight` koruması aktif.
+              ### ✨ Yapılan Düzenlemeler:
+              - **🎵 Tıklayınca YALNIZCA Spotify Açılır:**
+                - Spotify widget'larına (kart gövdesine, albüm kapağına veya şarkı adına) dokunulduğunda uygulamamız veya ayarlar değil, doğrudan orijinal **Spotify uygulaması** açılır.
+                - Önceki, Oynat/Durdur ve Sonraki tuşları medya kontrollerini gerçekleştirmeye devam eder.
+              - **🔒 SADECE Kilit Ekranında 2x2 Widget Gizlenir:**
+                - Ana ekrandaki 2x2 Spotify widget'ı şarkı çalsın veya çalmasın daima ekranda görünür kalır.
+                - Yalnızca **kilit ekranına (LockStar / Keyguard)** eklenen 2x2 widget, şarkı çalmazken tamamen gizlenir (`View.GONE`) ve duvar kağıdını temiz tutar. Şarkı başladığında kilit ekranında canlı albüm kapağıyla anında belirir!
+              - **🕒 Saat Yazısı Orijinal Boyutunda:**
+                - Saat widget'ı orijinal autoSize boyutunda ve responsive mizanpajında korunmaktadır.
             files: release_apk/*.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

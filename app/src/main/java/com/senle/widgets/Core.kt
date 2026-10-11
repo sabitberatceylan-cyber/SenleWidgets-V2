@@ -1,7 +1,9 @@
 package com.senle.widgets
 
+import android.app.KeyguardManager
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -163,7 +165,7 @@ object U {
             "ios_clock" -> iosClock(c, id, cols, rows)
             "ios_notes" -> iosNotes(c, id, cols, rows)
             "music_41" -> music41(c, id, cols, rows)
-            "music_22" -> music22(c, id, cols, rows)
+            "music_22" -> music22(c, id, cols, rows, m)
             "music_lock" -> musicLock(c, id, cols, rows)
             else -> date(c, id)
         }
@@ -866,14 +868,12 @@ object U {
         return rv
     }
 
-    private fun getSpotifyLaunchIntent(c: Context): PendingIntent {
+    private fun getSpotifyLaunchIntent(c: Context, id: Int = 8888): PendingIntent {
         val pm = c.packageManager
         val intent = pm.getLaunchIntentForPackage("com.spotify.music")
-            ?: Intent(Intent.ACTION_MAIN).apply {
-                addCategory(Intent.CATEGORY_APP_MUSIC)
-            }
+            ?: Intent(Intent.ACTION_VIEW, Uri.parse("https://open.spotify.com"))
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        return PendingIntent.getActivity(c, 8888, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        return PendingIntent.getActivity(c, id * 10 + 9, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
     }
 
     private fun getAodMusicLaunchIntent(c: Context): PendingIntent {
@@ -958,16 +958,44 @@ object U {
         val nextPending = PendingIntent.getBroadcast(c, id * 10 + 3, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         rv.setOnClickPendingIntent(R.id.btn_next, nextPending)
 
+        // 🎵 Spotify Tıklaması: Uygulamamız değil, doğrudan Spotify açılır
+        val spotifyPending = getSpotifyLaunchIntent(c, id)
+        rv.setOnClickPendingIntent(R.id.root, spotifyPending)
+        rv.setOnClickPendingIntent(R.id.album_art, spotifyPending)
+        rv.setOnClickPendingIntent(R.id.song_title, spotifyPending)
+        rv.setOnClickPendingIntent(R.id.artist_name, spotifyPending)
+
         return rv
     }
 
-    private fun music22(c: Context, id: Int, cols: Int, rows: Int): RemoteViews {
+    private fun music22(c: Context, id: Int, cols: Int, rows: Int, m: AppWidgetManager? = null): RemoteViews {
         val rv = RemoteViews(c.packageName, R.layout.w_music_22)
         val isPlaying = MediaHolder.isPlaying
 
-        // Kullanıcı talebi: SADECE 2x2 widget Spotify için şarkı yokken görünmez olsun
-        val hideIdle = P.b(c, id, "music_22_hide_idle", P.b(c, id, "music_hide_idle", true))
-        if (hideIdle && !isPlaying) {
+        // 🔒 Kilit ekranı tespiti:
+        // Ana ekrandaki (WIDGET_CATEGORY_HOME_SCREEN) 2x2 widget şarkı yokken ASLA gizlenmez.
+        // Sadece kilit ekranındaki (WIDGET_CATEGORY_KEYGUARD veya kilit alanı) 2x2 widget şarkı yokken gizlenir.
+        val shouldHideOnIdle = if (id == 0) {
+            false
+        } else {
+            val appWidgetManager = m ?: AppWidgetManager.getInstance(c)
+            val opts = try { appWidgetManager.getAppWidgetOptions(id) } catch (e: Exception) { null }
+            val cat = opts?.getInt(AppWidgetManager.OPTION_APPWIDGET_HOST_CATEGORY, -1) ?: -1
+            val isHomeScreen = (cat == AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN)
+            val isKeyguard = (cat == AppWidgetProviderInfo.WIDGET_CATEGORY_KEYGUARD)
+
+            if (isHomeScreen) {
+                false // Ana ekranda daima görünür kalır
+            } else if (isKeyguard) {
+                true // Kilit ekranında şarkı yokken gizlenir
+            } else {
+                val km = c.getSystemService(Context.KEYGUARD_SERVICE) as? KeyguardManager
+                val isLocked = km?.isKeyguardLocked == true
+                P.b(c, id, "music_hide_idle", isLocked)
+            }
+        }
+
+        if (shouldHideOnIdle && !isPlaying) {
             rv.setViewVisibility(R.id.root, View.GONE)
             rv.setViewVisibility(R.id.music_content, View.GONE)
             rv.setViewVisibility(R.id.music_bg, View.GONE)
@@ -1042,6 +1070,13 @@ object U {
         val nextPending = PendingIntent.getBroadcast(c, id * 10 + 3, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         rv.setOnClickPendingIntent(R.id.btn_next, nextPending)
 
+        // 🎵 Spotify Tıklaması: Uygulamamız değil, doğrudan Spotify açılır
+        val spotifyPending = getSpotifyLaunchIntent(c, id)
+        rv.setOnClickPendingIntent(R.id.root, spotifyPending)
+        rv.setOnClickPendingIntent(R.id.album_art, spotifyPending)
+        rv.setOnClickPendingIntent(R.id.song_title, spotifyPending)
+        rv.setOnClickPendingIntent(R.id.artist_name, spotifyPending)
+
         return rv
     }
 
@@ -1073,6 +1108,12 @@ object U {
         }
         val playPending = PendingIntent.getBroadcast(c, id * 10 + 2, playIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         rv.setOnClickPendingIntent(R.id.btn_play_pause, playPending)
+
+        // 🎵 Spotify Tıklaması: Uygulamamız değil, doğrudan Spotify açılır
+        val spotifyPending = getSpotifyLaunchIntent(c, id)
+        rv.setOnClickPendingIntent(R.id.root, spotifyPending)
+        rv.setOnClickPendingIntent(R.id.album_art, spotifyPending)
+        rv.setOnClickPendingIntent(R.id.song_title, spotifyPending)
 
         return rv
     }
